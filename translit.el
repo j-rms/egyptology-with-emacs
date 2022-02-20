@@ -1,7 +1,7 @@
 (require 'quail)
 (quail-define-package
  "transliteration" "Transliteration" "ḫ" nil
- "Providing an Egyptian transliteration scheme for Emacs. At present requires, at minimum, New Athena Unicode."
+ "Providing an Egyptian transliteration scheme for Emacs. Use a font that supports Egyptian transliteration characters, such as Brill, Noto, or Charis SIL."
  nil t t t t nil nil nil nil nil t)
 (quail-define-rules
  ("A" ?ꜣ) 
@@ -73,9 +73,9 @@
 
  ("}" ?})
 
- ("*" ?⋆) ; grammatically incorrect
+ ("*" ?⋆) ; 
 
- ("0" ?ø) ; unexpressed thing
+ ("0" ?ø) ; unexpressed
 
  ("'" ?ˈ) ; primary stress
 
