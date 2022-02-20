@@ -1,0 +1,19 @@
+* Egyptology with Emacs
+** =translit.el=
+   Provides an input method (i.e. a ‘keyboard’) for entering Unicode transliteration characters in Emacs.
+
+   Your Emacs fonts must include the necessary Unicode characters for Egyptian transliteration.  Try [[https://fonts.google.com/noto][Noto Sans Mono]] for fixed pitch, and [[http://software.sil.org/charis/download/][Charis SIL]] or [[https://brill.com/page/290][Brill]] for variable pitch.  For more information, see https://jsesh.qenherkhopeshef.org/varia/transliteration.
+*** Installation
+    Copy =translit.el= to wherever you want to keep it.  In your init file, add that this directory to your load-path (if you have not done so already), then load the transliteration scheme itself:
+
+ #+begin_src 
+ (add-to-list 'load-path "~/.emacs.d/elisp/") ; (or wherever you want to keep the script.)
+ (load "translit.el") ; load the transliteration scheme itself.
+ #+end_src
+
+ For immediate use, execute each line with =C-x C-e=.
+
+*** Use
+ To select a different input method (in this case transliteration): =C-u C-\= and then select =transliteration=.
+
+ To cycle the transliteration keyboard on and off: =C-\= 
