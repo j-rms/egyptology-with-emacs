@@ -6,7 +6,7 @@
 *** Installation
     Copy =translit.el= to wherever you want to keep it.  In your init file, add that directory to your load-path (if you have not already done so), then load the transliteration scheme itself:
 
- #+begin_src 
+ #+begin_src elisp
  (add-to-list 'load-path "~/.emacs.d/elisp/") ; (or wherever you want to keep the script.)
 
  (load "translit.el") ; load the transliteration scheme itself.
