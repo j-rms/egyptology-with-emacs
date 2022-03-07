@@ -282,3 +282,8 @@ def n_j_to_graphviz(n_j_output):
         print(row)
     return
 
+def nj_topology(collation):
+    return neighbour_joiner(dist_matrix_to_list(dist_matrix(collation)), [], 1)
+
+def nj_graphviz(collation):
+    return n_j_to_graphviz(nj_topology(collation))
