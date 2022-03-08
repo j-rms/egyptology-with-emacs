@@ -1,27 +1,39 @@
-
+# ------------------------------------------------------------------------------
+# BAKENSESHAT: tools for Egyptological textual criticism
+# ------------------------------------------------------------------------------
 
 def rotate_collation(collation):
-    """rotates collation 90 degrees anticlockwise, so that each witness is its own list"""
+    """rotates collation 90 degrees anticlockwise, so that each witness is
+its own list"""
     collation_rotated = [list(reversed(row)) for row in zip(*reversed(collation))]
     return collation_rotated
 
+# ------------------------------------------------------------------------------
+# HAMMING DISTANCE FUNCTIONS
+# ------------------------------------------------------------------------------
+
 def hamming(wit1, wit2):
-    """calculate the Hamming distance between two transliterations, expressed as the proportion of comparable text that is NOT identical"""
+    """calculate the Hamming distance between two transliterations,
+expressed as the proportion of comparable text that is NOT
+identical"""
     # internal functions:
     def lacuna_p(a_string):
-        """return True if a_string contains the character '[', which indicates it is lacunose"""
+        """return True if a_string contains the character '[', which indicates
+it is lacunose"""
         if '[' in a_string:
             return True
         else:
             return False
     def omission_p(a_string):
-        """return True if a_string == the character '-', which indicates it is an omission"""
+        """return True if a_string == the character '-', which indicates it is
+an omission"""
         if '-' == a_string:
             return True
         else:
             return False
     def comparable_parts(wit1, wit2):
-        """take two equally long lists of strings; return the parts that can be meaningfully used to calculate their Hamming distance."""
+        """take two equally long lists of strings; return the parts that can
+be meaningfully used to calculate their Hamming distance."""
         comparable_parts_list = []
         for position in range(len(wit1)):
             pair = [wit1[position], wit2[position]]
@@ -74,11 +86,17 @@ def dist_matrix(collation):
         deduped_dist_matrix.append(deduped_line)
     return deduped_dist_matrix
 
+# ------------------------------------------------------------------------------
+# NEIGHBOUR-JOINING FUNCTIONS
+# ------------------------------------------------------------------------------
+
 def dist_matrix_to_list(d_mat):
-    """takes a distance matrix; returns a list where each item has the format (distance, witness1, witness2)"""
+    """takes a distance matrix; returns a list where each item has the
+format (distance, witness1, witness2)"""
     # internal functions:
     def witness_in_column(column_number):
-        """takes a column number in the distance matrix; returns the witness name to which it corresponds"""
+        """takes a column number in the distance matrix; returns the witness
+name to which it corresponds"""
         column_names_list = d_mat[0]
         return column_names_list[column_number]
     # main body:
@@ -113,7 +131,8 @@ def affected_witnesses(dist_list, wit1, wit2):
     return affected
 
 def wit_distances(dist_list, wit):
-    """returns all distances between wit and all other witnesses mentioned in dist_list"""
+    """returns all distances between wit and all other witnesses mentioned
+in dist_list"""
     # feed this function a distance list produced by
     # affected_witnesses() to avoid including wit's sibling in the
     # returned list.
@@ -128,7 +147,8 @@ def wit_distances(dist_list, wit):
     return wit_dist_list
 
 def average_wit_distance(wit_dist_list):
-    """takes output produced by wit_distances; returns the average distance"""
+    """takes output produced by wit_distances; returns the average
+distance"""
     # for Neighbour-joining, it's important to feed the
     # affected_witnesses list to average_wit_distance, becuase we
     # don't want to include the distance between a witness and its
@@ -153,7 +173,8 @@ def dist_between(dist_list, wit1, wit2):
     return dist
 
 def sib_dist_to_node(dist_list, wit, sibling):
-    """takes A FULL DIST_LIST; returns the distance between a witness and its node"""
+    """takes A FULL DIST_LIST; returns the distance between a witness and
+its node"""
     # for this calculation, see Saitou 1987: 409, 6a and 6b.
     dist_between_siblings = dist_between(dist_list, wit, sibling)
     affected_witness_dist_list = affected_witnesses(dist_list, wit, sibling)
@@ -163,14 +184,16 @@ def sib_dist_to_node(dist_list, wit, sibling):
     return dist_to_node
 
 def broadcast_sibling_info(dist_list, wit1, wit2, node_name):
-    """receives a dist_list and two witnesses which are known to be siblings; reuturns their distances to their shared node"""
+    """receives a dist_list and two witnesses which are known to be
+siblings; reuturns their distances to their shared node"""
     wit1_dist = sib_dist_to_node(dist_list, wit1, wit2)
     wit2_dist = sib_dist_to_node(dist_list, wit2, wit1)
     sibling_statement = [node_name,[wit1, wit1_dist],[wit2, wit2_dist]]
     return sibling_statement
 
 def list_affected_witnesses(affected_dist_list, sib1, sib2):
-    """takes a distance list produced by affected_witnesses; returns a list of the names of the affected witnesses"""
+    """takes a distance list produced by affected_witnesses; returns a
+list of the names of the affected witnesses"""
     affected_wits = []
     for row in affected_dist_list:
         if row[1] == sib1 or row[1] == sib2:
@@ -180,7 +203,8 @@ def list_affected_witnesses(affected_dist_list, sib1, sib2):
     return list(set(affected_wits)) # remove duplicate entries, but return a list rather than a set.
 
 def dists_to_be_averaged(affected_dist_list, witness):
-    """takes an affected distance list and a witness; returns the two distances that need averaging"""
+    """takes an affected distance list and a witness; returns the two
+distances that need averaging"""
     dists_to_be_averaged = []
     for row in affected_dist_list:
         if witness in row:
@@ -188,7 +212,8 @@ def dists_to_be_averaged(affected_dist_list, witness):
     return dists_to_be_averaged
 
 def return_new_node(affected_dist_list, witness, node_name):
-    """returns a correctly formatted list for the distance between witness and node_name"""
+    """returns a correctly formatted list for the distance between witness
+and node_name"""
     dists = dists_to_be_averaged(affected_dist_list, witness)
     average_distance = (dists[0] + dists[1]) / 2
     return [average_distance, node_name, witness]
@@ -211,7 +236,10 @@ def grab_all_witness_names(dist_list):
     return list(set(wit_names))
 
 def neighbour_joiner(dist_list, siblings_list, next_node_num):
-    """Takes a SIMPLE, FULL, SORTED distance list, an (initially) empty list, the (starting) node number, and a list of witnesses to place (starting with all witnesses); returns a description of the Neighbour-joined tree"""
+    """Takes a SIMPLE, FULL, SORTED distance list, an (initially) empty
+list, the (starting) node number, and a list of witnesses to place
+(starting with all witnesses); returns a description of the
+Neighbour-joined tree"""
 
     # Identify the next pair of siblings:
     sibling_line = dist_list[0] # the pair of siblings will be the
