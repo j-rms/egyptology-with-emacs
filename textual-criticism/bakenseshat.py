@@ -746,3 +746,24 @@ def quartet_weighting(collation, witlist):
 def best_bis(collation, witlist, topnum):
     """return the most parsimonious <topnum> bifurcations for the given witlist, for the given collation"""
     return list_t2_groupings(witlist, collation)[:topnum]
+
+# ------------------------------------------------------------------------------
+# DIFF TWO COLLATIONS (witness names must be identical):
+# ------------------------------------------------------------------------------
+
+def col_diff(coll1, coll2):
+    witnames = coll1[0]
+    rownum = 0
+    changelist = []
+    for row in coll1:
+        cellnum = 0
+        for cell in row:
+            coll1_reading = coll1[rownum][cellnum]
+            coll2_reading = coll2[rownum][cellnum]
+            if coll1_reading != coll2_reading:
+                witname = witnames[cellnum]
+                diff = str(rownum) + ": " + witname + ": " + coll1_reading + " → " + coll2_reading
+                changelist.append(diff)
+            cellnum = cellnum + 1
+        rownum = rownum + 1
+    return changelist
