@@ -324,7 +324,7 @@ def get_wit_text(collation, name):
     """Return a named witness's text from a standard collation table"""
     namerow=collation[0]
     index_number = namerow.index(name)
-    col_rotated = bakenseshat.rotate_collation(collation)
+    col_rotated = rotate_collation(collation)
     return col_rotated[index_number]
 
 def sub_col(collation, name_list):
@@ -332,7 +332,7 @@ def sub_col(collation, name_list):
     subcol = []
     for name in name_list:
         subcol.append(get_wit_text(collation, name))
-    subcol = bakenseshat.rotate_collation(subcol) # rotate the collation back to columnar format
+    subcol = rotate_collation(subcol) # rotate the collation back to columnar format
     return subcol
 
 def type_2_locs(collation):
@@ -411,7 +411,7 @@ def pair_combos(combo_list):
 
 def score_type_2s_by_wit_set(t2_loc_table, divided_wit_set):
     """returns a score indicating how optimally a particular divided witness set divides the readings of a type-2 loc table produced by TYPE_2_LOCS()"""
-    loc_table = bakenseshat.rotate_collation(t2_loc_table)[1:] # give each witness its own list.
+    loc_table = rotate_collation(t2_loc_table)[1:] # give each witness its own list.
     loc_dict = [] 
     for line in loc_table:
         wit_name = line[0]
@@ -493,7 +493,7 @@ def list_groups_to_compare(witness_list):  #
 
 def return_winners(witness_list, collation):
     """return the type-2 variation-locations for the witnesses that agree with the highest-scoring bifurcation"""
-    witness_texts = bakenseshat.rotate_collation(collation)
+    witness_texts = rotate_collation(collation)
     def get_witness_text(name):
         for row in witness_texts:
             if row[0] == name:
