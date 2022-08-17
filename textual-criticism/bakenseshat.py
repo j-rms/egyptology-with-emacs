@@ -25,9 +25,9 @@ it is lacunose"""
         else:
             return False
     def omission_p(a_string):
-        """return True if a_string == the character '-', which indicates it is
+        """return True if a_string == the character '‑' (non-breaking hyphen, not normal - sign!!!), which indicates it is
 an omission"""
-        if '-' == a_string:
+        if '‑' == a_string:
             return True
         else:
             return False
@@ -315,3 +315,418 @@ def nj_topology(collation):
 
 def nj_graphviz(collation):
     return n_j_to_graphviz(nj_topology(collation))
+
+# ------------------------------------------------------------------------------
+# SEMIAUTOMATED TEXTUAL CRITICISM FUNCTIONS
+# ------------------------------------------------------------------------------
+
+def get_wit_text(collation, name):
+    """Return a named witness's text from a standard collation table"""
+    namerow=collation[0]
+    index_number = namerow.index(name)
+    col_rotated = bakenseshat.rotate_collation(collation)
+    return col_rotated[index_number]
+
+def sub_col(collation, name_list):
+    """return a sub-collation from COLLATION containing only those witnesses in NAME_LIST"""
+    subcol = []
+    for name in name_list:
+        subcol.append(get_wit_text(collation, name))
+    subcol = bakenseshat.rotate_collation(subcol) # rotate the collation back to columnar format
+    return subcol
+
+def type_2_locs(collation):
+    """return a list of all lines with type_2 variations in COLLATION"""
+    # internal functions
+    def no_lacuna_p(line):
+        """returns True if no element of LINE contains '[', i.e. is lacunose"""
+        no_lacuna_p = True
+        for item in line:
+            if '[' in item:
+                no_lacuna_p = False
+        return no_lacuna_p
+    def no_insignificant_omission_p(line):
+        """returns True if no element of LINE == '‑' (non-breaking hyphen, not normal - sign!!!), i.e. is an insignificant omission"""
+        no_insignificant_omission_p = True
+        for item in line:
+            if "‑" == item:
+                no_insignificant_omission_p = False
+        return no_insignificant_omission_p
+    # body
+    two_version_lines = []
+    linum = 0
+    linums = []
+    for line in collation:
+        number_of_variants = len(set(line))
+        if number_of_variants == 2 and no_lacuna_p(line) and no_insignificant_omission_p(line):
+            two_version_lines.append(line)
+            linums.append(linum)
+        linum = linum + 1
+    # having established which lines contain two separate readings, we
+    # must now only return those lines where each reading is attested
+    # at least twice:
+    type_2_lines = []
+    type_2_linums = []
+    entry = 0
+    for line in two_version_lines:
+        versions = list(set(line))
+        if line.count(versions[0]) >= 2 and line.count(versions[1]) >= 2:
+            final_line = []
+            final_line.append(linums[entry])
+            final_line.extend(line)
+            type_2_lines.append(final_line)
+        entry = entry + 1
+
+    final_table = [0]
+    final_table.extend(collation[0])
+    final_table = [final_table]
+    final_table.extend(type_2_lines)
+    return final_table
+
+from itertools import combinations
+def witness_combos(witness_list):
+    combos = []
+    for n in range(1, len(witness_list) + 1): 
+        combos += list(combinations(witness_list, n))
+    return combos
+
+def pair_combos(combo_list):
+    """returns a COMBO_LIST as a list of paired lists"""
+    num_wits = len(combo_list[-1]) # the number of witnesses is equal
+                                   # to the length of the last item of
+                                   # the list.
+    wit_set = set(combo_list[-1]) # get the names of all witnesses as a set
+    combos = combo_list[:-1] # don't count the last item
+    paired_lists = []
+    sets_considered = []
+    for item in combos:
+        this_set = set(item)
+        other_set = wit_set.difference(this_set)
+        if this_set not in sets_considered:
+            pair = [list(this_set), list(other_set)]
+            sets_considered.append(other_set)
+            paired_lists.append(pair)
+    paired_lists.append([list(wit_set),[]])
+    return paired_lists
+
+def score_type_2s_by_wit_set(t2_loc_table, divided_wit_set):
+    """returns a score indicating how optimally a particular divided witness set divides the readings of a type-2 loc table produced by TYPE_2_LOCS()"""
+    loc_table = bakenseshat.rotate_collation(t2_loc_table)[1:] # give each witness its own list.
+    loc_dict = [] 
+    for line in loc_table:
+        wit_name = line[0]
+        wit_readings = line[1:]
+        loc_dict.append((wit_name, wit_readings))
+    loc_dict = dict(loc_dict) # transform loc_table into a dictionary,
+                              # with witness names as keys.
+    wit_set_1 = divided_wit_set[0]
+    wit_set_2 = divided_wit_set[1]
+
+    def set_subset(wit_set):
+        """returns the correct subset of t2_loc_table for the witness subset"""
+        return sub_col(t2_loc_table, wit_set)
+
+    def score_set(wit_set):
+        """score a witness set for consistency"""
+        if wit_set == []: # if there are no witnesses in the set
+            return 0
+        set_col = set_subset(wit_set) # get a subset collation table just for this witness set
+        num_witnesses = len(set_col[0]) # establish how many witnesses are in the set
+        total_score = 0
+        for row in set_col[1:]: # go through each row of set_subset apart from the names row
+            if len(set(row)) == 1: # if all words in the set are the same
+                score = num_witnesses # then the row scores full marks, 1 point per witness.
+            else:
+                # otherwise, score 1 point per instance of the more frequently represented word:
+                word_1 = list(set(row))[0]
+                word_2 = list(set(row))[1]
+                word_1_freq = row.count(word_1)
+                word_2_freq = row.count(word_2)
+                if word_1_freq == word_2_freq: # if both words are equally frequent,
+                    score = word_1_freq - 1 # let the score be word_1's frequency - 1 (so that a single word by itself scores 0 points)
+                elif word_1_freq > word_2_freq:
+                    score = word_1_freq - 1
+                else:
+                    score = word_2_freq - 1
+            total_score = total_score + score
+        return total_score
+
+    
+
+            # all_words = t2_loc_table[num][1:] # get all instances of the two words for this line
+            # word_set = set(all_words) # get the set of these, i.e. just the two words attested across this line
+            # word_1 = list(word_set)[0] # get the first word
+            # word_2 = list(word_set)[1] # get the second word
+            
+            
+    return score_set(wit_set_1) + score_set(wit_set_2)
+
+def list_all_scores(t2_loc_table):
+    witness_set = t2_loc_table[0][1:]
+    score_list = []
+    for divided_wit_set in pair_combos(witness_combos(witness_set)):
+        score = score_type_2s_by_wit_set(t2_loc_table, divided_wit_set)
+        # print(divided_wit_set)
+        score_list.append([score, divided_wit_set])
+    final_list = []
+    for row in score_list:
+        final_list.append([row[0], row[1][0], row[1][1]])
+    return list(reversed(sorted(final_list)))
+
+def list_t2_groupings(witness_list, collation):
+    """given a list of witnesses and a collation, return the optimal subdivision for type-2 deviations"""
+    type_2_loc_table = type_2_locs(sub_col(collation, witness_list))
+    all_scores = list_all_scores(type_2_loc_table)
+    return all_scores
+
+def list_groups_to_compare(witness_list):  # 
+    """returns a list of every group that must be compared for a given witness list, starting with comparing only 4 witnesses at once, and rising to comparing the total number of witnesses in the group"""
+    bifurcation_list = []
+    current_group_size = 4
+    for group_size in range(current_group_size, len(witness_list) + 1):
+        progress_message = "calculating for group size " + str(group_size)
+        print(progress_message)
+        bifurcation_list += list(combinations(witness_list, current_group_size))
+        current_group_size = current_group_size + 1
+    return bifurcation_list
+
+
+def return_winners(witness_list, collation):
+    """return the type-2 variation-locations for the witnesses that agree with the highest-scoring bifurcation"""
+    witness_texts = bakenseshat.rotate_collation(collation)
+    def get_witness_text(name):
+        for row in witness_texts:
+            if row[0] == name:
+                return row
+        return 'witness name not in collation'
+    def group_witness_texts(witness_list):
+        """return a list of witness_list's texts, in the order provided"""
+        grouped_texts = []
+        for witness in witness_list:
+            grouped_texts.append(get_witness_text(witness))
+        return grouped_texts
+    
+    def get_variant_list(subgroup, col_row):
+        """return a list of all variants for the subgroup at row col_row"""
+        variant_list = []
+        for name in subgroup:
+            variant_list.append(get_witness_text(name)[col_row])
+        return variant_list
+        
+    def count_variants(variant_list):
+        """count the number of variant readings in a subgroup for a given row of the collation"""
+        return len(set(variant_list))
+
+    # def commoner_variant(variant_list):
+    #     """return the more common variant in a variant list containing two variants"""
+    #     variants = set(variant_list)
+    #     variant1 = variant_list[0]
+    #     variant2 = variant_list[1]
+    #     variant1_freq = variant_list.count(variant1)
+    #     variant2_freq = variant_list.count(variant2)
+    #     if variant1_freq == variant2_freq:
+    #         return "EQUAL FREQUENCY"
+    #     elif variant1_freq > variant2_freq:
+    #         return variant1
+    #     else:
+    #         return variant2
+    #     pass
+
+    def process_row_for_subgroup(subgroup, other_subgroup, row_num):
+        """do all processes for a subgroup and a row_num"""
+        # print(subgroup) # for debug
+        group_vars = get_variant_list(subgroup, row_num)
+        othergroup_vars = get_variant_list(other_subgroup, row_num)
+        how_many_vars = count_variants(group_vars)
+        if how_many_vars == 1 and group_vars[0] not in othergroup_vars: # if all readings are identical, and exclusively confined to this subgroup:
+            
+            row_results = [row_num, subgroup, subgroup] # then all witnesses are winners, since the row agrees with majority opinion.
+        else:
+            row_results = [row_num, [], subgroup] # then reward no witnesses, as the row does not conform with majority opinion.
+        return row_results
+
+
+    def process_subgroup(subgroup, other_subgroup):
+        subgroup_results = []
+        for row in variant_table[1:]:
+            row_num = row[0]
+            subgroup_results.append(process_row_for_subgroup(subgroup, other_subgroup, row_num))
+        return subgroup_results
+
+
+    score_table = list_t2_groupings(witness_list, collation)[:2] # we are only interested in the top two scores
+    # print(score_table) # for debug
+    if score_table[0][0] == score_table[1][0]:
+        return [] # if the two scores are equal, return an empty list.
+
+    variant_table = (type_2_locs(sub_col(collation, witness_list)))
+    group1 = score_table[0][1]
+    # print(group1) # for debug
+    group2 = score_table[0][2]
+    # print(group2) # for debug
+    scores_to_return = []
+
+    names = witness_list # the order in which the names appear is the same as the order of the witness list.
+    set_texts = group_witness_texts(names) # grab the texts in the order used in the variant table.
+
+
+
+    group1_results = process_subgroup(group1, group2)
+    group2_results = process_subgroup(group2, group1)
+    collected_results = group1_results + group2_results
+
+    # # remove all rows for which no witnesses are winners
+    # final_results = []
+    # if collected_results == []: # if the whole table is empty
+    #     final_results = collected_results
+    # else:
+    #     for row in collected_results:
+    #         if row[1] != []:
+    #             final_results.append(row)
+
+    return collected_results
+
+
+def initialize_weighting_table(collation):
+    """returns a new weighting table sharing the same structure as the collation table passed to it"""
+    weighting_table = [] + [collation[0]] # copy the collation's name row as the first row of the weighting table
+    for row in collation[1:]: # and for every row except the first of the collation table:
+        new_row = [row[0]]
+        for element in row[1:]: # and for every element of the row except for the first (which is the row number)
+            new_row.append(0) # append a zero in place of every entry
+        weighting_table.append(new_row)
+    return weighting_table
+
+def write_winners_to_weighting_table(weighting_table, rounds_table, winners_results):
+    """updates WEIGHTING_TABLE and ROUNDS_TABLE with the WINNERS_RESULTS"""
+    for row in winners_results:
+        rownum = row[0]
+        witnesses_who_won = row[1]
+        witnesses_who_played = row[2]
+        for wit_name in witnesses_who_won:
+            wit_index = weighting_table[0].index(wit_name)
+            weighting_table[rownum][wit_index] += 1
+        for wit_name in witnesses_who_played:
+            wit_index = rounds_table[0].index(wit_name)
+            rounds_table[rownum][wit_index] += 1
+
+    return # nothing to return, as the weighting_table is permanently edited.
+
+def t2_weighting(collation, witness_set):
+    """runs every member of witness_set through RETURN_WINNERS() and returns a weighting table"""
+    winners_table = initialize_weighting_table(collation)
+    rounds_table = initialize_weighting_table(collation)
+    groups_to_compare = list_groups_to_compare(witness_set)
+    compare_length_warning = "need to compare " + str(len(groups_to_compare)) + " groups!"
+    print(compare_length_warning)
+    for group in groups_to_compare:
+        winners = return_winners(group, collation)
+        write_winners_to_weighting_table(winners_table, rounds_table, winners)
+
+    prediction_table = [winners_table[0]] # make the prediction table's top row the name line.
+    for row in zip(winners_table[1:], rounds_table[1:], collation[1:]):
+        prediction_row = [row[0][0]] # make first item in row the row number
+        for item in zip(row[0][1:], row[1][1:], row[2][1:]): # for all the other items
+            predictivity = item
+            # if item[1] == 0:
+            #     predictivity = 0
+            # else:
+            #     predictivity = item[0] / item[1] # the number of wins vs. the number of rounds played
+            prediction_row.append(predictivity)
+        prediction_table.append(prediction_row)
+            
+            
+    return prediction_table
+
+def underline_table_heading(table):
+    """puts a line under the first line of a table"""
+    output = [table[0]]
+    output.append(None)
+    output.extend(table[1:])
+    return output
+
+def sub_col_rownums(collation, wit_list):
+    """return a subcollation of the table with row numbers"""
+    subcol = sub_col(collation, wit_list)
+    sub_col_rownums = []
+    rownum = 0
+    for row in subcol:
+        new_row = [rownum] + row
+        sub_col_rownums.append(new_row)
+        rownum = rownum + 1
+    return sub_col_rownums
+
+def quartets(wit_list):
+    """Returns every possible set of 4 witnesses, for a given witness list"""
+    quartets = []
+    quartets += list(combinations(wit_list, 4))
+    return quartets
+
+def t2_weighting_by_quartets(collation, witness_set):
+    """a slimmed-down version of t2_weighting(): exposes every subset's type-2 variation by considering only every possible group of 4 witnesses"""
+    winners_table = initialize_weighting_table(collation)
+    rounds_table = initialize_weighting_table(collation)
+    groups_to_compare = quartets(witness_set)
+    compare_length_warning = "need to compare " + str(len(groups_to_compare)) + " groups!"
+    print(compare_length_warning)
+    for group in groups_to_compare:
+        winners = return_winners(group, collation)
+        write_winners_to_weighting_table(winners_table, rounds_table, winners)
+
+    prediction_table = [winners_table[0]] # make the prediction table's top row the name line.
+    for row in zip(winners_table[1:], rounds_table[1:], collation[1:]):
+        prediction_row = [row[0][0]] # make first item in row the row number
+        for item in zip(row[0][1:], row[1][1:], row[2][1:]): # for all the other items
+            predictivity = item
+            prediction_row.append(predictivity)
+        prediction_table.append(prediction_row)
+    return prediction_table
+
+def sort_collation_by_weight(collation, weighting_table):
+    name_row = ['freq'] + collation[0]
+    other_rows = []
+    for row in zip(weighting_table[1:], collation[1:]):
+       total = sum(row[0][1:])
+       #updated_row = [total] + row[1]
+       updated_row = [total]
+       for element in zip(row[0], row[1]):
+           updated_row.append(element)
+       other_rows.append(updated_row)
+    sorted_rows = list(reversed(sorted(other_rows)))
+    
+    return [name_row] + sorted_rows
+
+# ------------------------------------------------------------------------------
+# COLLATION FILLING AND FORMATTING FUNCTIONS
+# ------------------------------------------------------------------------------
+
+def fill_collation(collation, refcolnum):
+    """takes a collation and fills the empty cells using the values from column <refcolnum>"""
+    filled_collation = []
+    rownum = 0
+    for row in collation:
+        refword = row[refcolnum]
+        filled_row = []
+        cellnum = 0
+        for cell in row:
+            if cellnum == 0:
+                filled_row.append(rownum)
+                cellnum = cellnum + 1
+                rownum = rownum + 1
+            elif cell == '':
+                filled_row.append(refword)
+            else:
+                filled_row.append(cell)
+        filled_collation.append(filled_row)
+    return filled_collation
+
+def ref_collation(raw_collation, filled_collation):
+    """takes a raw and a filled collation; returns a reference collation that uses both sets of reference numbers"""
+    new_col = []
+    rownum = 0
+    for row in filled_collation:
+        newrow = [raw_collation[rownum][0]]
+        newrow.extend(row)
+        rownum += 1
+        new_col.append(newrow)
+    return new_col
