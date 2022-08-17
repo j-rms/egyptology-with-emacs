@@ -730,3 +730,19 @@ def ref_collation(raw_collation, filled_collation):
         rownum += 1
         new_col.append(newrow)
     return new_col
+
+# ------------------------------------------------------------------------------
+# WRAPPER FUNCTIONS FOR EASE OF USE
+# ------------------------------------------------------------------------------
+
+def get_type_2s(collation, witlist):
+    """return all type 2 variants within a given collation, for a given list of witnesses"""
+    return type_2_locs(sub_col(collation, witlist))
+
+def quartet_weighting(collation, witlist):
+    """return the collation weighted by quartets for the given witness list"""
+    return sub_col_rownums(t2_weighting_by_quartets(collation, witlist), witlist)
+
+def best_bis(collation, witlist, topnum):
+    """return the most parsimonious <topnum> bifurcations for the given witlist, for the given collation"""
+    return list_t2_groupings(witlist, collation)[:topnum]
