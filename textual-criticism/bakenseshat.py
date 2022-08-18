@@ -70,8 +70,11 @@ def dist_matrix(collation):
     for this_witness in rot_col:
         h_dists = [this_witness[0]] # first item in table should be witness's name.
         for other_witnesses in rot_col:
-            h_dist = hamming(this_witness[1:], other_witnesses[1:]) # position 0 is just the witness name.
-            h_dists.append(h_dist)
+            if other_witnesses[0:] == this_witness[0:]:
+                h_dists.append("itself")
+            else:
+                h_dist = hamming(this_witness[1:], other_witnesses[1:]) # position 0 is just the witness name.
+                h_dists.append(h_dist)
         dist_matrix.append(h_dists)
     # remove duplicate entries from the matrix:
     deduped_dist_matrix = []
@@ -79,10 +82,13 @@ def dist_matrix(collation):
         deduped_line = []
         reached_end = False
         for entry in line:
-            if entry == 0.0:
+            if entry == "itself":
                 reached_end = True
             if reached_end == False:
-                deduped_line.append(entry)
+                if entry == 0.0:
+                    deduped_line.append(0.0001) # you can't have 0.0 without getting a divide by zero error when calculating neighbour joining; have to use an extremely small value instead.
+                else:
+                    deduped_line.append(entry)
         deduped_dist_matrix.append(deduped_line)
     return deduped_dist_matrix
 
@@ -153,10 +159,12 @@ distance"""
     # affected_witnesses list to average_wit_distance, becuase we
     # don't want to include the distance between a witness and its
     # sibling when calculating the average distance:
+    # print(wit_dist_list)
     num_wits = len(wit_dist_list)
     dists = []
     for item in wit_dist_list:
         dists.append(item[0])
+    # print(dists)
     average_dist = sum(dists) / num_wits
     return average_dist
 
@@ -215,6 +223,7 @@ def return_new_node(affected_dist_list, witness, node_name):
     """returns a correctly formatted list for the distance between witness
 and node_name"""
     dists = dists_to_be_averaged(affected_dist_list, witness)
+    # print(len(dists))
     average_distance = (dists[0] + dists[1]) / 2
     return [average_distance, node_name, witness]
 
@@ -245,6 +254,7 @@ Neighbour-joined tree"""
     sibling_line = dist_list[0] # the pair of siblings will be the
                                 # ones at the top of the sorted
                                 # distance list.
+    # print("sibling_line: " + str(sibling_line))
     sib1 = sibling_line[1] # sibling_line[0] will be a distance.
     sib2 = sibling_line[2]
 
@@ -268,21 +278,25 @@ Neighbour-joined tree"""
 
     # SORT THE FINAL LIST, TO PUT THE NEXT PAIR OF SIBLINGS AT THE TOP:
     new_dist_list = sorted(new_dist_list)
-    
+    # print(new_dist_list)
     # increment the node number for the next time this function is run:
     next_node_num = next_node_num + 1
 
     # if there are no witnesses left to place, return the description of the siblings:
-    if len(new_dist_list) == 1:
+    if len(new_dist_list) == 1: # or len(new_dist_list) == 0: #not sure if this is needed or not.
         siblings_list.append([new_dist_list[0][1],
 [new_dist_list[0][2], new_dist_list[0][0]], [new_dist_list[0][2], new_dist_list[0][0]]])
-        # print(siblings_list) # for testing
-        # print(new_dist_list)
+        print("SIBLINGS LIST:")
+        print(siblings_list) # for testing
+        print("NEW DIST LIST:")
+        print(new_dist_list)
         return siblings_list
     else:
-        # print(siblings_list)
+        print("SIBLINGS LIST:")
+        print(siblings_list)
         # print(sib1, sib2)
-        # print(new_dist_list)
+        print("NEW DIST LIST:")
+        print(new_dist_list)
         return neighbour_joiner(new_dist_list, siblings_list, next_node_num)
 
 def n_j_to_graphviz(n_j_output):
