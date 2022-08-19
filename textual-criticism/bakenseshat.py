@@ -86,7 +86,7 @@ def dist_matrix(collation):
                 reached_end = True
             if reached_end == False:
                 if entry == 0.0:
-                    deduped_line.append(0.0001) # you can't have 0.0 without getting a divide by zero error when calculating neighbour joining; have to use an extremely small value instead.
+                    deduped_line.append(0.0000001) # you can't have 0.0 without getting a divide by zero error when calculating neighbour joining; have to use an extremely small value instead.
                 else:
                     deduped_line.append(entry)
         deduped_dist_matrix.append(deduped_line)
@@ -286,17 +286,17 @@ Neighbour-joined tree"""
     if len(new_dist_list) == 1: # or len(new_dist_list) == 0: #not sure if this is needed or not.
         siblings_list.append([new_dist_list[0][1],
 [new_dist_list[0][2], new_dist_list[0][0]], [new_dist_list[0][2], new_dist_list[0][0]]])
-        print("SIBLINGS LIST:")
-        print(siblings_list) # for testing
-        print("NEW DIST LIST:")
-        print(new_dist_list)
+        # print("SIBLINGS LIST:")
+        # print(siblings_list) # for testing
+        # print("NEW DIST LIST:")
+        # print(new_dist_list)
         return siblings_list
     else:
-        print("SIBLINGS LIST:")
-        print(siblings_list)
-        # print(sib1, sib2)
-        print("NEW DIST LIST:")
-        print(new_dist_list)
+        # print("SIBLINGS LIST:")
+        # print(siblings_list)
+        # # print(sib1, sib2)
+        # print("NEW DIST LIST:")
+        # print(new_dist_list)
         return neighbour_joiner(new_dist_list, siblings_list, next_node_num)
 
 def n_j_to_graphviz(n_j_output):
@@ -781,3 +781,24 @@ def col_diff(coll1, coll2):
             cellnum = cellnum + 1
         rownum = rownum + 1
     return changelist
+
+# ------------------------------------------------------------------------------
+# STRIP A COLLATION OF ALL DETERMINATIVES THAT BEGIN A CELL
+# ------------------------------------------------------------------------------
+def strip_dets(collation, threshold):
+    """takes a collation table; returns the collation table stripped of all lines containing more than <threshold> cells containing determinatives"""
+    nodets = [collation[0]] # to contain all rows of the collation containing fewer than <threshold> determinatives
+    for row in collation[1:]:
+        detcount = 0
+        for cell in row:
+            # res = any(char.isupper() for char in str(cell)) # with my transliteration scheme, any uppercase character in a cell must be part of a Gardiner sign number.
+            # if res == True:
+            #safer, just take out transliteration characters on their own row by detecting capital letters at the beginning of the row:
+            # print(str(cell)) # for debugging: if you get an index out of range error, probably there's a completely empty cell.
+            if str(cell)[0].isupper():
+                detcount = detcount + 1
+            if "NN" in str(cell):
+                detcount = detcount - 1 # remove the penalty for cells containing NN: that just means the name of the manuscript owner.
+        if threshold > detcount:
+            nodets.append(row)
+    return nodets
