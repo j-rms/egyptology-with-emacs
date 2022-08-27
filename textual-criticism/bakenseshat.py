@@ -50,6 +50,8 @@ be meaningfully used to calculate their Hamming distance."""
         return identical_parts_list
     # main function body:
     comparable_length = len(comparable_parts(wit1, wit2))
+    if comparable_length == 0:
+        comparable_length = 0.0000001 # a comparable length of 0 will produce a divide by zero error when calculating hamming_distance below; have to use an extremely small value instead.
     identical_length = len(identical_parts((comparable_parts(wit1, wit2))))
     hamming_distance = 1 - (identical_length / comparable_length)
     return hamming_distance
@@ -85,10 +87,7 @@ def dist_matrix(collation):
             if entry == "itself":
                 reached_end = True
             if reached_end == False:
-                if entry == 0.0:
-                    deduped_line.append(0.0000001) # you can't have 0.0 without getting a divide by zero error when calculating neighbour joining; have to use an extremely small value instead.
-                else:
-                    deduped_line.append(entry)
+                deduped_line.append(entry)
         deduped_dist_matrix.append(deduped_line)
     return deduped_dist_matrix
 
@@ -316,7 +315,9 @@ def n_j_to_graphviz(n_j_output):
         else:
             return [graphviz_line_1, graphviz_line_2]
     # main body
-    graphviz_lines = ['graph G {', 'overlap = false;', 'splines = true']
+    # graphviz_lines = ['graph G {', 'overlap = false;', 'splines = true']
+    graphviz_lines = ['graph G {', 'overlap=prism', 'overlap_scaling=2', 'ratio=1', 'splines = true'] # more compact
+
     for row in n_j_output:
         graphviz_lines.extend(write_line(row))
     graphviz_lines.append('}')
@@ -768,7 +769,7 @@ def best_bis(collation, witlist, topnum):
 def col_diff(coll1, coll2):
     witnames = coll1[0]
     rownum = 0
-    changelist = []
+    changelist = [['/row/', '/witness/', '/reading/', '', '/normalization/'], None]
     for row in coll1:
         cellnum = 0
         for cell in row:
@@ -776,7 +777,8 @@ def col_diff(coll1, coll2):
             coll2_reading = coll2[rownum][cellnum]
             if coll1_reading != coll2_reading:
                 witname = witnames[cellnum]
-                diff = str(rownum) + ": " + witname + ": " + coll1_reading + " → " + coll2_reading
+                # diff = str(rownum) + ": " + witname + ": " + coll1_reading + " → " + coll2_reading
+                diff = [rownum, witname, coll1_reading, " → ", coll2_reading]
                 changelist.append(diff)
             cellnum = cellnum + 1
         rownum = rownum + 1
@@ -802,3 +804,133 @@ def strip_dets(collation, threshold):
         if threshold > detcount:
             nodets.append(row)
     return nodets
+
+# ------------------------------------------------------------------------------
+# RETURN ONLY THOSE CELLS OF A COLLATION THAT CONTAIN DETERMINATIVES
+# ------------------------------------------------------------------------------
+def only_dets(collation, threshold):
+    """takes a collation table; returns the collation table with only those rows containing more than <threshold> cells containing determinatives"""
+    nodets = [collation[0]] # to contain all rows of the collation containing fewer than <threshold> determinatives
+    for row in collation[1:]:
+        detcount = 0
+        for cell in row:
+            # res = any(char.isupper() for char in str(cell)) # with my transliteration scheme, any uppercase character in a cell must be part of a Gardiner sign number.
+            # if res == True:
+            #safer, just take out transliteration characters on their own row by detecting capital letters at the beginning of the row:
+            # print(str(cell)) # for debugging: if you get an index out of range error, probably there's a completely empty cell.
+            if str(cell)[0].isupper():
+                detcount = detcount + 1
+            if "NN" in str(cell):
+                detcount = detcount - 1 # remove the penalty for cells containing NN: that just means the name of the manuscript owner.
+        if threshold < detcount:
+            nodets.append(row)
+    return nodets
+
+
+# ------------------------------------------------------------------------------
+# LACUNOSITY FUNCTIONS
+# ------------------------------------------------------------------------------
+
+def lacunosity(text):
+    """Takes the text of a collation expressed as a list of words; returns measurements of the text's lacunosity"""
+    lacunae_counter = 0
+    omission_counter = 0
+    for word in text:
+        if '[' in word:
+            lacunae_counter = lacunae_counter + 1
+        if '‑' == word or '‑‑' == word:
+            omission_counter = omission_counter + 1
+    percentage = round(lacunae_counter / (len(text) - omission_counter) * 100, 0)
+    lacunosity_description = [len(text) - omission_counter, lacunae_counter, percentage]
+    return lacunosity_description
+
+def get_lacunosity(collation, witness):
+    """Takes a collation and a witness name, and returns the lacunosity of the text as: [<length>, <lines lacunose>, <% lacunose>]"""
+    return lacunosity(get_wit_text(collation, witness)[1:]) # because cell 0 is just the witness's name.
+
+def lacunosity_table(collation):
+    """returns measurements of lacunosity for a collation's witnesses"""
+    wit_list = collation[0][1:]
+    lac_table = [['/witness/', '/length/','/lacunose cells/', '/% lacunose/'],None]
+    for witness in wit_list:
+        line = [witness]
+        line.extend(get_lacunosity(collation, witness))
+        lac_table.append(line)
+    return lac_table
+
+def strip_lacunose_witnesses(collation, threshold):
+    """returns a collation stripped of all witnesses whose texts are more than <threshold>% lacunose"""
+    lac_table = lacunosity_table(collation)
+    lac_list = []
+    for row in lac_table[2:]: # because row 0 = titles and row 1 = None (to make horizontal rule)
+        lac_list.append([row[0], row[3]]) # append the witness name and the % lacunose to lac_list
+    not_too_lacunose = [] # the witness list of witnesses which are not too lacunose
+    for entry in lac_list:
+        if entry[1] < threshold:
+            not_too_lacunose.append(entry[0]) # append the witness name to not_too_lacunose.
+    return sub_col_rownums(collation, not_too_lacunose)
+
+def list_lacunose_witnesses(collation, threshold):
+    """returns a list of a collation's witnesses which are >= than <threshold>% lacunose"""
+    lac_table = lacunosity_table(collation)
+    lac_list = []
+    for row in lac_table[2:]: # because row 0 = titles and row 1 = None (to make horizontal rule)
+        lac_list.append([row[0], row[3]]) # append the witness name and the % lacunose to lac_list
+    too_lacunose = [] # the witness list of witnesses which are not too lacunose
+    for entry in lac_list:
+        if entry[1] >= threshold:
+            too_lacunose.append(entry[0]) # append the witness name to not_too_lacunose.
+    return too_lacunose
+
+def get_witness_list(collation):
+    return collation[0][1:]
+
+
+def intersection(collation, wit1, wit2):
+    "returns a list of the text meaningfully shared by both witnesses"
+    subcol = sub_col_rownums(collation, [wit1, wit2])
+    intersection = [cell for cell in subcol if cell[1] != '‑' and cell[2] != '‑' and '[' not in cell[1] and '[' not in cell[2]]
+    return intersection
+
+def diff_2_wits(collation, wit1, wit2):
+    """returns a table of the text that differs between two witnesses"""
+    subcol = intersection(collation, wit1, wit2)
+    diff = [row for row in subcol if row[1] != row[2]]
+    return diff
+
+def diff_table(collation):
+    """returns a table showing the number of words that vary between each witness, number of actual words and the proportion of comparable text"""
+    witlist = collation[0][1:]
+    diff_table = [collation[0][0:-1]]
+    for wit in witlist[1:]:
+        diff_table_line = [wit]
+        for otherwit in witlist[0:-1]:
+            if wit == otherwit:
+                break
+            else:
+                num_diffs = len(diff_2_wits(collation, wit, otherwit)[1:])
+                wit_text = get_wit_text(collation, wit)[1:]
+                otherwit_text = get_wit_text(collation, otherwit)[1:]
+                hamming_dist = round(hamming(wit_text, otherwit_text), 3)
+                info = [num_diffs, hamming_dist]
+                diff_table_line.append(info)
+        diff_table.append(diff_table_line)
+    return diff_table
+
+import statistics
+
+def get_mean_units(diff_table):
+    """takes a diff_table made with diff_table(); returns the mean number of units (i.e. words) used to produce the Hamming distances in the table"""
+    units = []
+    for row in diff_table[1:]:
+        for cell in row[1:]:
+            units.append(cell[0])
+    return round(statistics.mean(units), 3)
+
+def get_units(diff_table):
+    """takes a diff table and returns a list of the units used to produce Hamming distances in the table"""
+    units = []
+    for row in diff_table[1:]:
+        for cell in row[1:]:
+            units.append(cell[0])
+    return units
