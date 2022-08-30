@@ -840,7 +840,7 @@ def lacunosity(text):
             lacunae_counter = lacunae_counter + 1
         if '‑' == word or '‑‑' == word:
             omission_counter = omission_counter + 1
-    percentage = round(lacunae_counter / (len(text) - omission_counter) * 100, 0)
+    percentage = round(lacunae_counter / (len(text) - omission_counter) * 100, 2)
     lacunosity_description = [len(text) - omission_counter, lacunae_counter, percentage]
     return lacunosity_description
 
@@ -899,7 +899,7 @@ def diff_2_wits(collation, wit1, wit2):
     return diff
 
 def diff_table(collation):
-    """returns a table showing the number of words that vary between each witness, number of actual words and the proportion of comparable text"""
+    """returns a table showing the amount of text that varies between each witness: firstly the number of actual words, and secondly the proportion of comparable text"""
     witlist = collation[0][1:]
     diff_table = [collation[0][0:-1]]
     for wit in witlist[1:]:
@@ -928,9 +928,109 @@ def get_mean_units(diff_table):
     return round(statistics.mean(units), 3)
 
 def get_units(diff_table):
-    """takes a diff table and returns a list of the units used to produce Hamming distances in the table"""
+    """takes a diff table and returns a list of the units used to produce Hamming distances in the table, i.e. the number of words that DIFFER from each other for every pair of witnesses"""
     units = []
     for row in diff_table[1:]:
         for cell in row[1:]:
             units.append(cell[0])
     return units
+
+def intersection_table(collation):
+    """returns a table showing the amount of text meaningfully shared by every pair of witnesses in a collation"""
+    witlist = collation[0][1:]
+    intersection_table = [collation[0][0:-1]]
+    for wit in witlist[1:]:
+        intersection_table_line = [wit]
+        for otherwit in witlist[0:-1]:
+            if wit == otherwit:
+                break
+            else:
+                num_intersects = len(intersection(collation, wit, otherwit)[1:])
+                intersection_table_line.append(num_intersects)
+        intersection_table.append(intersection_table_line)
+    return intersection_table
+
+def get_intersection_units(intersection_table):
+    """takes an intersection_table made with intersection_table(); returns a list of the numbers of units (i.e. words) that intersect between ever pair of witnesses"""
+    units = []
+    for row in intersection_table[1:]:
+        for cell in row[1:]:
+            units.append(cell)
+    return units
+
+def get_frequency_of_diff_units(diff_table, intersection_table):
+    """returns the frequency with which differing variants occur in every witness pairs' comparable variation places"""
+    diff_units = get_units(diff_table)
+    inter_units = get_intersection_units(intersection_table)
+    freq_list = [round(unit[0] / unit[1], 2) for unit in list(zip(diff_units, inter_units)) if unit[1] != 0]  # have to remove witnesses with 0 comparable material.
+    return freq_list
+
+def get_statistics(col, rounding, stripping_threshold, witness_list, population_or_sample):
+    """returns a table of statistics about a collation, which could be tagged as 'population' or 'sample': remember to apply lacunosity threshold before calling this!"""
+    col_phons = sub_col_rownums(strip_dets(col, stripping_threshold), witness_list)
+    col_dets = sub_col_rownums(only_dets(col, stripping_threshold), witness_list)
+    # do the above two before the below, so that the stripping threshold for determinatives applies to the whole collation, not just the subcollation.
+    col = sub_col_rownums(col, witness_list)
+
+    stat_table = [["variation places","","all data", "phonemic data", "determinative data"], None]
+    if population_or_sample == "sample":
+        mean_symbol = "x̄"
+        stdev_symbol = "s"
+        s_div_m_symbol = "s÷x̄"
+    else:
+        mean_symbol = "μ"
+        stdev_symbol = "σ"
+        s_div_m_symbol = "σ÷μ"
+
+    comp_units_col = get_intersection_units(intersection_table(col))
+    comp_units_phons = get_intersection_units(intersection_table(col_phons))
+    comp_units_dets = get_intersection_units(intersection_table(col_dets))
+
+    col_comp_mean = round(statistics.mean(comp_units_col), rounding)
+    phons_comp_mean = round(statistics.mean(comp_units_phons), rounding)
+    dets_comp_mean = round(statistics.mean(comp_units_dets), rounding)
+    stat_table.append(["comparable", mean_symbol, col_comp_mean, phons_comp_mean, dets_comp_mean])
+
+    col_comp_stdev = round(statistics.stdev(comp_units_col), rounding)
+    phons_comp_stdev = round(statistics.stdev(comp_units_phons), rounding)
+    dets_comp_stdev = round(statistics.stdev(comp_units_dets), rounding)
+    stat_table.append(["", stdev_symbol, col_comp_stdev, phons_comp_stdev, dets_comp_stdev])
+
+    stat_table.append(["", s_div_m_symbol, round(col_comp_stdev / col_comp_mean, rounding), round(phons_comp_stdev / phons_comp_mean, rounding), round(dets_comp_stdev / dets_comp_mean, rounding)])
+
+    stat_table.append(None)
+
+    diff_units_col = get_units(diff_table(col))
+    diff_units_phons = get_units(diff_table(col_phons))
+    diff_units_dets = get_units(diff_table(col_dets))
+
+    col_diff_mean = round(statistics.mean(diff_units_col), rounding)
+    phons_diff_mean = round(statistics.mean(diff_units_phons), rounding)
+    dets_diff_mean = round(statistics.mean(diff_units_dets), rounding)
+    stat_table.append(["differing", mean_symbol, col_diff_mean, phons_diff_mean, dets_diff_mean])
+
+    col_diff_stdev = round(statistics.stdev(diff_units_col), rounding)
+    phons_diff_stdev = round(statistics.stdev(diff_units_phons), rounding)
+    dets_diff_stdev = round(statistics.stdev(diff_units_dets), rounding)
+    stat_table.append(["", stdev_symbol, col_diff_stdev, phons_diff_stdev, dets_diff_stdev])
+
+    stat_table.append(["", s_div_m_symbol, round(col_diff_stdev / col_diff_mean, rounding), round(phons_diff_stdev / phons_diff_mean, rounding), round(dets_diff_stdev / dets_diff_mean, rounding)])
+
+    stat_table.append(None)
+
+    freq_units_col = get_frequency_of_diff_units(diff_table(col), intersection_table(col))
+    freq_units_phons = get_frequency_of_diff_units(diff_table(col_phons), intersection_table(col_phons))
+    freq_units_dets = get_frequency_of_diff_units(diff_table(col_dets), intersection_table(col_dets))
+
+    col_freq_mean = round(statistics.mean(freq_units_col), rounding)
+    phons_freq_mean = round(statistics.mean(freq_units_phons), rounding)
+    dets_freq_mean = round(statistics.mean(freq_units_dets), rounding)
+    stat_table.append(["freq. differing", mean_symbol, col_freq_mean, phons_freq_mean, dets_freq_mean])
+
+    col_freq_stdev = round(statistics.stdev(freq_units_col), rounding)
+    phons_freq_stdev = round(statistics.stdev(freq_units_phons), rounding)
+    dets_freq_stdev = round(statistics.stdev(freq_units_dets), rounding)
+    stat_table.append(["", stdev_symbol, col_freq_stdev, phons_freq_stdev, dets_freq_stdev])
+
+    stat_table.append(["", s_div_m_symbol, round(col_freq_stdev / col_freq_mean, rounding), round(phons_freq_stdev / phons_freq_mean, rounding), round(dets_freq_stdev / dets_freq_mean, rounding)])
+    return stat_table
