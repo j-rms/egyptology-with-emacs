@@ -935,6 +935,15 @@ def get_units(diff_table):
             units.append(cell[0])
     return units
 
+def get_hamming_distances(diff_table):
+    """takes a diff table and returns a list of the Hamming distances in the table, i.e. the PROPORTION of words that DIFFER from each other for every pair of witnesses"""
+    units = []
+    for row in diff_table[1:]:
+        for cell in row[1:]:
+            units.append(cell[1])
+    return units
+
+
 def intersection_table(collation):
     """returns a table showing the amount of text meaningfully shared by every pair of witnesses in a collation"""
     witlist = collation[0][1:]
@@ -1034,3 +1043,136 @@ def get_statistics(col, rounding, stripping_threshold, witness_list, population_
 
     stat_table.append(["", s_div_m_symbol, round(col_freq_stdev / col_freq_mean, rounding), round(phons_freq_stdev / phons_freq_mean, rounding), round(dets_freq_stdev / dets_freq_mean, rounding)])
     return stat_table
+
+# ------------------------------------------------------------------------------
+# MATPLOTLIB FUNCTIONS
+# ------------------------------------------------------------------------------
+
+import matplotlib
+import matplotlib.pyplot
+
+# Use the histogram functions within a python source block where the
+# results are written to a drawer (:results value drawer): this
+# enables the filename to be returned cleanly.
+
+def histogram(data, x_label, y_label, font, filename):
+    binsize = int(round(2 * (len(data) ** (1. / 3)),0)) # use the Rice Rule to determine bin size: 2 ✕ cube root of the number of data values.
+    matplotlib.pyplot.clf()
+    matplotlib.rc('axes', axisbelow=False)
+    matplotlib.pyplot.style.use('fast')
+    matplotlib.rcParams['font.family'] = [font]
+    matplotlib.rcParams.update({'font.size': 10})
+    matplotlib.pyplot.grid(b=True, which='both', axis='both')
+    matplotlib.pyplot.hist(data, bins=binsize)
+    matplotlib.pyplot.xlabel(x_label)
+    matplotlib.pyplot.ylabel(y_label)
+    matplotlib.pyplot.savefig(filename, format='pdf', bbox_inches="tight")
+    return 'file:' + filename
+
+def hamming_distances_histogram(collation, remove_no_comps_p, font, filename, additional_caption_material):
+    """Save (to PDF) a histogram of all the Hamming distances in the distance matrix for <collation>"""
+    data = get_hamming_distances(diff_table(collation))
+    if remove_no_comps_p == True:
+        comparable_material = get_intersection_units(intersection_table(collation)) # determine how many units of comparable material there are
+        comp_plus_data=list(zip(comparable_material, data))
+        stripped_data = [pair[1] for pair in comp_plus_data if pair[0] != 0] # remove distances made on the basis of no comparable material
+        data = stripped_data
+    histogram(data, 'Hamming distance', 'frequency', font, filename)
+    comps_tag = "(witness pairs with no comparable material omitted). " if remove_no_comps_p == True else "(witness pairs with no comparable material included). "
+    caption = "Histogram of distance matrix's Hamming distances " + comps_tag + additional_caption_material
+    return '#+caption: ' + caption + '\n' + '#+name: ' + filename + '\n#+attr_latex: :placement [p]' + '\n' + 'file:' + filename
+
+def units_for_hamming_distances_histogram(collation, remove_no_comps_p, font, filename, additional_caption_material):
+    """Save (to PDF) a histogram of all the units (number of differing readings between each witness pair) used to create the Hamming distances in the distance matrix for <collation>"""
+    data = get_units(diff_table(collation))
+    if remove_no_comps_p == True:
+        comparable_material = get_intersection_units(intersection_table(collation)) # determine how many units of comparable material there are
+        comp_plus_data=list(zip(comparable_material, data))
+        stripped_data = [pair[1] for pair in comp_plus_data if pair[0] != 0] # remove distances made on the basis of no comparable material
+        data = stripped_data
+    histogram(data, '№ differing variation places used to calculate Hamming distances', 'frequency', font, filename)
+    comps_tag = "(witness pairs with no comparable material omitted). " if remove_no_comps_p == True else "(witness pairs with no comparable material included). "
+    caption = "Histogram of the number of differing variation places used to calculate the distance matrix's Hamming distances " + comps_tag + additional_caption_material
+    return '#+caption: ' + caption + '\n' + '#+name: ' + filename + '\n#+attr_latex: :placement [p]' + '\n' + 'file:' + filename
+
+
+def three_histograms(data1, data2, data3, x_label, y_label, font, filename, data1_label, data2_label, data3_label):
+    binsize1 = int(round(2 * (len(data1) ** (1. / 3)),0)) # use the Rice Rule to determine bin size: 2 ✕ cube root of the number of data values.
+    binsize2 = int(round(2 * (len(data2) ** (1. / 3)),0)) # use the Rice Rule to determine bin size: 2 ✕ cube root of the number of data values.
+    binsize3 = int(round(2 * (len(data2) ** (1. / 3)),0)) # use the Rice Rule to determine bin size: 2 ✕ cube root of the number of data values.
+    matplotlib.pyplot.clf()
+    matplotlib.rc('axes', axisbelow=False)
+    matplotlib.pyplot.style.use('fast')
+    matplotlib.rcParams['font.family'] = [font]
+    matplotlib.rcParams.update({'font.size': 10})
+    matplotlib.pyplot.grid(b=True, which='both', axis='both')
+    # matplotlib.pyplot.hist([data1, data2, data3], bins=binsize1, label=[data1_label, data2_label, data3_label])
+    matplotlib.pyplot.hist(data1, bins=binsize1, alpha=0.5, label=data1_label, edgecolor='black', linewidth=1)
+    matplotlib.pyplot.hist(data2, bins=binsize2, alpha=0.5, label=data2_label, edgecolor='black', linewidth=1)
+    matplotlib.pyplot.hist(data3, bins=binsize3, alpha=0.5, label=data3_label, edgecolor='black', linewidth=1)
+    matplotlib.pyplot.xlabel(x_label)
+    matplotlib.pyplot.ylabel(y_label)
+    matplotlib.pyplot.legend(loc='best')
+    matplotlib.pyplot.savefig(filename, format='pdf', bbox_inches="tight")
+    return 'file:' + filename
+
+def hamming_distances_histogram_pda(collation, threshold_dets, threshold_phons, remove_no_comps_p, font, filename, additional_caption_material):
+    """Save (to PDF) a histogram of all the Hamming distances in the distance matrix for <collation>, for all the data, phonemic, and determinative material"""
+    col_all = collation
+    col_dets = only_dets(collation, threshold_dets)
+    col_phons = strip_dets(collation, threshold_phons)
+    data_all = get_hamming_distances(diff_table(col_all))
+    data_phon = get_hamming_distances(diff_table(col_phons))
+    data_dets = get_hamming_distances(diff_table(col_dets))
+    if remove_no_comps_p == True:
+        comparable_material_all = get_intersection_units(intersection_table(col_all)) # determine how many units of comparable material there are
+        comparable_material_phons = get_intersection_units(intersection_table(col_phons)) # determine how many units of comparable material there are
+        comparable_material_dets = get_intersection_units(intersection_table(col_dets)) # determine how many units of comparable material there are
+        
+        comp_plus_data_all=list(zip(comparable_material_all, data_all))
+        comp_plus_data_phons=list(zip(comparable_material_phons, data_phon))
+        comp_plus_data_dets=list(zip(comparable_material_dets, data_dets))
+
+        stripped_data_all = [pair[1] for pair in comp_plus_data_all if pair[0] != 0] # remove distances made on the basis of no comparable material
+        stripped_data_phons = [pair[1] for pair in comp_plus_data_phons if pair[0] != 0] # remove distances made on the basis of no comparable material
+        stripped_data_dets = [pair[1] for pair in comp_plus_data_dets if pair[0] != 0] # remove distances made on the basis of no comparable material
+
+        data_all = stripped_data_all
+        data_phon = stripped_data_phons
+        data_dets = stripped_data_dets
+
+    three_histograms(data_all, data_phon, data_dets, 'Hamming distance', 'frequency', font, filename, 'all data', 'phonemic data', 'determinative data')
+    comps_tag = "(witness pairs with no comparable material omitted). " if remove_no_comps_p == True else "(witness pairs with no comparable material included). "
+    caption = "Histogram of distance matrix's Hamming distances for all data, phonemic data, and determinative data " + comps_tag + additional_caption_material
+    return '#+caption: ' + caption + '\n' + '#+name: ' + filename + '\n#+attr_latex: :placement [p]' + '\n' + 'file:' + filename
+
+
+def hamming_distances_histogram_pda_units(collation, threshold_dets, threshold_phons, remove_no_comps_p, font, filename, additional_caption_material):
+    """Save (to PDF) a histogram of all the Hamming distances in the distance matrix for <collation>, for all the data, phonemic, and determinative material"""
+    col_all = collation
+    col_dets = only_dets(collation, threshold_dets)
+    col_phons = strip_dets(collation, threshold_phons)
+    data_all = get_units(diff_table(col_all))
+    data_phon = get_units(diff_table(col_phons))
+    data_dets = get_units(diff_table(col_dets))
+    if remove_no_comps_p == True:
+        comparable_material_all = get_intersection_units(intersection_table(col_all)) # determine how many units of comparable material there are
+        comparable_material_phons = get_intersection_units(intersection_table(col_phons)) # determine how many units of comparable material there are
+        comparable_material_dets = get_intersection_units(intersection_table(col_dets)) # determine how many units of comparable material there are
+        
+        comp_plus_data_all=list(zip(comparable_material_all, data_all))
+        comp_plus_data_phons=list(zip(comparable_material_phons, data_phon))
+        comp_plus_data_dets=list(zip(comparable_material_dets, data_dets))
+
+        stripped_data_all = [pair[1] for pair in comp_plus_data_all if pair[0] != 0] # remove distances made on the basis of no comparable material
+        stripped_data_phons = [pair[1] for pair in comp_plus_data_phons if pair[0] != 0] # remove distances made on the basis of no comparable material
+        stripped_data_dets = [pair[1] for pair in comp_plus_data_dets if pair[0] != 0] # remove distances made on the basis of no comparable material
+
+        data_all = stripped_data_all
+        data_phon = stripped_data_phons
+        data_dets = stripped_data_dets
+
+    three_histograms(data_all, data_phon, data_dets, '№ differing variation places used to calculate Hamming distances', 'frequency', font, filename, 'all data', 'phonemic data', 'determinative data')
+    comps_tag = "(witness pairs with no comparable material omitted). " if remove_no_comps_p == True else "(witness pairs with no comparable material included). "
+    caption = "Histogram of the number of differing variation places used to calculate the distance matrix's Hamming distances for all data, phonemic data, and determinative data " + comps_tag + additional_caption_material
+    return '#+caption: ' + caption + '\n' + '#+name: ' + filename + '\n#+attr_latex: :placement [p]' + '\n' + 'file:' + filename
