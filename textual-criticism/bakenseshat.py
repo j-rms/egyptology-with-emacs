@@ -1196,3 +1196,27 @@ def scatter_2_cols(col1, col2, label1, label2, font, filename):
     matplotlib.pyplot.savefig(filename, format='pdf', bbox_inches='tight')
     caption = "Scatter graph: " + label1 + " vs. " + label2 + "."
     return '#+caption: ' + caption + '\n' + '#+name: ' + filename.rsplit('.', maxsplit=1)[0] + '\n#+attr_latex: :placement [t]' + '\n' + 'file:' + filename
+
+def scatter_3_cols(col1, col2, col3, label1, label2, label3, font, filename, caption_postscript):
+    units1 = get_units(diff_table(col1))
+    units2 = get_units(diff_table(col2))
+    units3 = get_units(diff_table(col3))    
+    hammings1 = get_hamming_distances(diff_table(col1))
+    hammings2 = get_hamming_distances(diff_table(col2))
+    hammings3 = get_hamming_distances(diff_table(col3))
+    matplotlib.pyplot.clf()
+    matplotlib.rc('axes', axisbelow=True)
+    matplotlib.pyplot.style.use('fast')
+    matplotlib.rcParams['font.family'] = [font]
+    matplotlib.rcParams.update({'font.size': 10})
+    matplotlib.pyplot.grid(b=True, which='both', axis='both', linewidth=.5)
+    matplotlib.pyplot.scatter(units1, hammings1, s=3, label=label1)
+    matplotlib.pyplot.scatter(units2, hammings2, s=2, label=label2)
+    matplotlib.pyplot.scatter(units3, hammings3, s=1, label=label3)
+    matplotlib.pyplot.xlabel('№ differing variation places used to calculate Hamming distances')
+    matplotlib.pyplot.ylabel('Hamming distance')
+    matplotlib.pyplot.legend(loc='best')
+    matplotlib.pyplot.savefig(filename, format='pdf', bbox_inches='tight')
+    caption = "Scatter graph: " + label1 + " vs. " + label2 + " vs." + label3 + "." + caption_postscript
+    return '#+caption: ' + caption + '\n' + '#+name: ' + filename.rsplit('.', maxsplit=1)[0] + '\n#+attr_latex: :placement [t]' + '\n' + 'file:' + filename
+
