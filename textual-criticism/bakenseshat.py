@@ -1062,8 +1062,8 @@ def histogram(data, x_label, y_label, font, filename):
     matplotlib.pyplot.style.use('fast')
     matplotlib.rcParams['font.family'] = [font]
     matplotlib.rcParams.update({'font.size': 10})
-    matplotlib.pyplot.grid(b=True, which='both', axis='both')
-    matplotlib.pyplot.hist(data, bins=binsize)
+    matplotlib.pyplot.grid(b=True, which='both', axis='both', linewidth=.5)
+    matplotlib.pyplot.hist(data, bins=binsize, edgecolor='black', linewidth=.5)
     matplotlib.pyplot.xlabel(x_label)
     matplotlib.pyplot.ylabel(y_label)
     matplotlib.pyplot.savefig(filename, format='pdf', bbox_inches="tight")
@@ -1080,7 +1080,7 @@ def hamming_distances_histogram(collation, remove_no_comps_p, font, filename, ad
     histogram(data, 'Hamming distance', 'frequency', font, filename)
     comps_tag = "(witness pairs with no comparable material omitted). " if remove_no_comps_p == True else "(witness pairs with no comparable material included). "
     caption = "Histogram of distance matrix's Hamming distances " + comps_tag + additional_caption_material
-    return '#+caption: ' + caption + '\n' + '#+name: ' + filename + '\n#+attr_latex: :placement [p]' + '\n' + 'file:' + filename
+    return '#+caption: ' + caption + '\n' + '#+name: ' + filename + '\n#+attr_latex: :placement [t]' + '\n' + 'file:' + filename
 
 def units_for_hamming_distances_histogram(collation, remove_no_comps_p, font, filename, additional_caption_material):
     """Save (to PDF) a histogram of all the units (number of differing readings between each witness pair) used to create the Hamming distances in the distance matrix for <collation>"""
@@ -1093,23 +1093,23 @@ def units_for_hamming_distances_histogram(collation, remove_no_comps_p, font, fi
     histogram(data, '№ differing variation places used to calculate Hamming distances', 'frequency', font, filename)
     comps_tag = "(witness pairs with no comparable material omitted). " if remove_no_comps_p == True else "(witness pairs with no comparable material included). "
     caption = "Histogram of the number of differing variation places used to calculate the distance matrix's Hamming distances " + comps_tag + additional_caption_material
-    return '#+caption: ' + caption + '\n' + '#+name: ' + filename + '\n#+attr_latex: :placement [p]' + '\n' + 'file:' + filename
+    return '#+caption: ' + caption + '\n' + '#+name: ' + filename + '\n#+attr_latex: :placement [t]' + '\n' + 'file:' + filename
 
 
 def three_histograms(data1, data2, data3, x_label, y_label, font, filename, data1_label, data2_label, data3_label):
     binsize1 = int(round(2 * (len(data1) ** (1. / 3)),0)) # use the Rice Rule to determine bin size: 2 ✕ cube root of the number of data values.
     binsize2 = int(round(2 * (len(data2) ** (1. / 3)),0)) # use the Rice Rule to determine bin size: 2 ✕ cube root of the number of data values.
-    binsize3 = int(round(2 * (len(data2) ** (1. / 3)),0)) # use the Rice Rule to determine bin size: 2 ✕ cube root of the number of data values.
+    binsize3 = int(round(2 * (len(data3) ** (1. / 3)),0)) # use the Rice Rule to determine bin size: 2 ✕ cube root of the number of data values.
     matplotlib.pyplot.clf()
     matplotlib.rc('axes', axisbelow=False)
     matplotlib.pyplot.style.use('fast')
     matplotlib.rcParams['font.family'] = [font]
     matplotlib.rcParams.update({'font.size': 10})
-    matplotlib.pyplot.grid(b=True, which='both', axis='both')
-    # matplotlib.pyplot.hist([data1, data2, data3], bins=binsize1, label=[data1_label, data2_label, data3_label])
-    matplotlib.pyplot.hist(data1, bins=binsize1, alpha=0.5, label=data1_label, edgecolor='black', linewidth=1)
-    matplotlib.pyplot.hist(data2, bins=binsize2, alpha=0.5, label=data2_label, edgecolor='black', linewidth=1)
-    matplotlib.pyplot.hist(data3, bins=binsize3, alpha=0.5, label=data3_label, edgecolor='black', linewidth=1)
+    matplotlib.pyplot.grid(b=True, which='both', axis='both', linewidth=.5)
+    # matplotlib.pyplot.hist([data1, data2, data3], bins=binsize3, label=[data1_label, data2_label, data3_label])
+    matplotlib.pyplot.hist(data1, bins=binsize1, alpha=1, label=data1_label, edgecolor='black', linewidth=.5)
+    matplotlib.pyplot.hist(data2, bins=binsize2, alpha=0.5, label=data2_label, edgecolor='black', linewidth=.5)
+    matplotlib.pyplot.hist(data3, bins=binsize3, alpha=0.5, label=data3_label, edgecolor='black', linewidth=.5)
     matplotlib.pyplot.xlabel(x_label)
     matplotlib.pyplot.ylabel(y_label)
     matplotlib.pyplot.legend(loc='best')
@@ -1144,7 +1144,7 @@ def hamming_distances_histogram_pda(collation, threshold_dets, threshold_phons, 
     three_histograms(data_all, data_phon, data_dets, 'Hamming distance', 'frequency', font, filename, 'all data', 'phonemic data', 'determinative data')
     comps_tag = "(witness pairs with no comparable material omitted). " if remove_no_comps_p == True else "(witness pairs with no comparable material included). "
     caption = "Histogram of distance matrix's Hamming distances for all data, phonemic data, and determinative data " + comps_tag + additional_caption_material
-    return '#+caption: ' + caption + '\n' + '#+name: ' + filename + '\n#+attr_latex: :placement [p]' + '\n' + 'file:' + filename
+    return '#+caption: ' + caption + '\n' + '#+name: ' + filename + '\n#+attr_latex: :placement [t]' + '\n' + 'file:' + filename
 
 
 def hamming_distances_histogram_pda_units(collation, threshold_dets, threshold_phons, remove_no_comps_p, font, filename, additional_caption_material):
@@ -1175,4 +1175,24 @@ def hamming_distances_histogram_pda_units(collation, threshold_dets, threshold_p
     three_histograms(data_all, data_phon, data_dets, '№ differing variation places used to calculate Hamming distances', 'frequency', font, filename, 'all data', 'phonemic data', 'determinative data')
     comps_tag = "(witness pairs with no comparable material omitted). " if remove_no_comps_p == True else "(witness pairs with no comparable material included). "
     caption = "Histogram of the number of differing variation places used to calculate the distance matrix's Hamming distances for all data, phonemic data, and determinative data " + comps_tag + additional_caption_material
-    return '#+caption: ' + caption + '\n' + '#+name: ' + filename + '\n#+attr_latex: :placement [p]' + '\n' + 'file:' + filename
+    return '#+caption: ' + caption + '\n' + '#+name: ' + filename.rsplit('.', maxsplit=1)[0] + '\n#+attr_latex: :placement [t]' + '\n' + 'file:' + filename
+
+def scatter_2_cols(col1, col2, label1, label2, font, filename):
+    units1 = get_units(diff_table(col1))
+    units2 = get_units(diff_table(col2))
+    hammings1 = get_hamming_distances(diff_table(col1))
+    hammings2 = get_hamming_distances(diff_table(col2))
+    matplotlib.pyplot.clf()
+    matplotlib.rc('axes', axisbelow=True)
+    matplotlib.pyplot.style.use('fast')
+    matplotlib.rcParams['font.family'] = [font]
+    matplotlib.rcParams.update({'font.size': 10})
+    matplotlib.pyplot.grid(b=True, which='both', axis='both', linewidth=.5)
+    matplotlib.pyplot.scatter(units1, hammings1, s=2, label=label1)
+    matplotlib.pyplot.scatter(units2, hammings2, s=.5, label=label2)
+    matplotlib.pyplot.xlabel('№ differing variation places used to calculate Hamming distances')
+    matplotlib.pyplot.ylabel('Hamming distance')
+    matplotlib.pyplot.legend(loc='best')
+    matplotlib.pyplot.savefig(filename, format='pdf', bbox_inches='tight')
+    caption = "Scatter graph: " + label1 + " vs. " + label2 + "."
+    return '#+caption: ' + caption + '\n' + '#+name: ' + filename.rsplit('.', maxsplit=1)[0] + '\n#+attr_latex: :placement [t]' + '\n' + 'file:' + filename
