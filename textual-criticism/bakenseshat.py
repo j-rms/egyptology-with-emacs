@@ -1063,7 +1063,7 @@ def histogram(data, x_label, y_label, font, filename):
     matplotlib.rcParams['font.family'] = [font]
     matplotlib.rcParams.update({'font.size': 10})
     matplotlib.pyplot.grid(b=True, which='both', axis='both', linewidth=.5)
-    matplotlib.pyplot.hist(data, bins=binsize, edgecolor='black', linewidth=.5)
+    matplotlib.pyplot.hist(data, bins=binsize, edgecolor='blue', linewidth=.5, hatch='OO')
     matplotlib.pyplot.xlabel(x_label)
     matplotlib.pyplot.ylabel(y_label)
     matplotlib.pyplot.savefig(filename, format='pdf', bbox_inches="tight")
@@ -1107,9 +1107,9 @@ def three_histograms(data1, data2, data3, x_label, y_label, font, filename, data
     matplotlib.rcParams.update({'font.size': 10})
     matplotlib.pyplot.grid(b=True, which='both', axis='both', linewidth=.5)
     # matplotlib.pyplot.hist([data1, data2, data3], bins=binsize3, label=[data1_label, data2_label, data3_label])
-    matplotlib.pyplot.hist(data1, bins=binsize1, alpha=1, label=data1_label, edgecolor='black', linewidth=.5)
-    matplotlib.pyplot.hist(data2, bins=binsize2, alpha=0.5, label=data2_label, edgecolor='black', linewidth=.5)
-    matplotlib.pyplot.hist(data3, bins=binsize3, alpha=0.5, label=data3_label, edgecolor='black', linewidth=.5)
+    matplotlib.pyplot.hist(data1, bins=binsize1, alpha=1, label=data1_label, edgecolor='blue', linewidth=.5, hatch='OO')
+    matplotlib.pyplot.hist(data2, bins=binsize2, alpha=0.5, label=data2_label, edgecolor='orange', linewidth=.5, hatch='oo')
+    matplotlib.pyplot.hist(data3, bins=binsize3, alpha=0.5, label=data3_label, edgecolor='green', linewidth=.5, hatch='..')
     matplotlib.pyplot.xlabel(x_label)
     matplotlib.pyplot.ylabel(y_label)
     matplotlib.pyplot.legend(loc='best')
@@ -1217,6 +1217,34 @@ def scatter_3_cols(col1, col2, col3, label1, label2, label3, font, filename, cap
     matplotlib.pyplot.ylabel('Hamming distance')
     matplotlib.pyplot.legend(loc='best')
     matplotlib.pyplot.savefig(filename, format='pdf', bbox_inches='tight')
-    caption = "Scatter graph: " + label1 + " vs. " + label2 + " vs." + label3 + "." + caption_postscript
+    caption = "Scatter graph: " + label1 + " vs. " + label2 + " vs." + label3 + ". " + caption_postscript
     return '#+caption: ' + caption + '\n' + '#+name: ' + filename.rsplit('.', maxsplit=1)[0] + '\n#+attr_latex: :placement [t]' + '\n' + 'file:' + filename
 
+import numpy
+
+def lac_chart(collation, font, filename, caption_postscript, width, height):
+    """Returns a bar chart giving lacunosity values for <col>'s witnesses"""
+    lac_table = lacunosity_table(collation)
+    witnesses = [row[0] for row in lac_table[2:]]
+    lengths = [row[1] for row in lac_table[2:]]
+    lac_cells = [row[2] for row in lac_table[2:]]
+    pc_lacs = [row[3] for row in lac_table[2:]]
+    unlac_lengths = [pair[0] - pair[1] for pair in list(zip(lengths, lac_cells))]
+    matplotlib.pyplot.clf()
+    matplotlib.pyplot.figure(figsize=(width,height))
+    matplotlib.rc('axes', axisbelow=True)
+    matplotlib.pyplot.style.use('fast')
+    matplotlib.rcParams['font.family'] = [font]
+    matplotlib.rcParams.update({'font.size': 10})
+    matplotlib.pyplot.grid(b=True, which='both', axis='both', linewidth=.5)
+    matplotlib.pyplot.barh(range(len(unlac_lengths)), unlac_lengths, 0.8, 0, label='extant variation places')
+    matplotlib.pyplot.barh(range(len(lac_cells)), lac_cells, 0.8, unlac_lengths, label='lacunose variation places')
+    matplotlib.pyplot.yticks(range(len(witnesses)), witnesses, rotation='horizontal')
+    for index,data in enumerate(lengths):
+        if pc_lacs[index] != 0.0:
+            matplotlib.pyplot.text(x = data, y = index, s = f"{pc_lacs[index]}%", color='black', ha='right', va='center_baseline', fontsize='small')
+    matplotlib.pyplot.legend(loc='best')
+    matplotlib.pyplot.savefig(filename, format='pdf', bbox_inches='tight')
+    caption = 'Extant and lacunose variation places per witness.'
+    return '#+caption: ' + caption + '\n' + '#+name: ' + filename.rsplit('.', maxsplit=1)[0] + '\n#+attr_latex: :placement [t]' + '\n' + 'file:' + filename
+    return witnesses
