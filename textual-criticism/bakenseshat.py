@@ -1437,3 +1437,13 @@ def next_wit_report(collation, witlist):
     wit_report.insert(1, None)
     wit_report[0].insert(2, 'assessment')
     return wit_report
+
+def added_type_2_locs(collation, old_witlist, new_witlist):
+    """returns the type 2 variation places added in old_witlist which are not present in new_witlist"""
+    new_table = t2_weighting_by_quartets_stripped_unweighted(collation, new_witlist)
+    old_table = t2_weighting_by_quartets_stripped_unweighted(collation, old_witlist)
+    old_type2_locs = set([row[0] for row in old_table])
+    all_new_type2_locs = set([row[0] for row in new_table])
+    added_type_2_locs = sorted(all_new_type2_locs - old_type2_locs)
+    added_type_2_loc_list = [row for row in new_table if row[0] in added_type_2_locs]
+    return added_type_2_loc_list
