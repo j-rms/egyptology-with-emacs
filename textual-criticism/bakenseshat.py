@@ -1430,14 +1430,6 @@ def t2_weighting_by_quartets_stripped_unweighted(collation, witlist):
     stripped_col = strip_unweighted(weighted_col)
     return stripped_col
 
-def next_wit_report(collation, witlist):
-    """returns a blank next witness report for the collation (i.e. for the last witness in the collation)"""
-    stripped_quartets = t2_weighting_by_quartets_stripped_unweighted(collation, witlist)
-    wit_report = [[row[0], row[-1]] for row in stripped_quartets]
-    wit_report.insert(1, None)
-    wit_report[0].insert(2, 'assessment')
-    return wit_report
-
 def added_type_2_locs(collation, old_witlist, new_witlist):
     """returns the type 2 variation places added in old_witlist which are not present in new_witlist"""
     new_table = t2_weighting_by_quartets_stripped_unweighted(collation, new_witlist)
@@ -1447,3 +1439,24 @@ def added_type_2_locs(collation, old_witlist, new_witlist):
     added_type_2_locs = sorted(all_new_type2_locs - old_type2_locs)
     added_type_2_loc_list = [row for row in new_table if row[0] in added_type_2_locs]
     return [new_table[0]] + (added_type_2_loc_list)
+
+def next_wit_report(collation, old_witlist, new_witlist):
+    """returns a blank next witness report for the collation (i.e. for the last witness in the collation)"""
+    stripped_quartets = t2_weighting_by_quartets_stripped_unweighted(collation, new_witlist)
+    wit_report = [[row[0], row[-1]] for row in stripped_quartets]
+    wit_report.insert(1, None)
+    wit_report[0].insert(2, 'assessment')
+
+    new_table = stripped_quartets
+    old_table = t2_weighting_by_quartets_stripped_unweighted(collation, old_witlist)
+    old_type2_locs = set([row[0] for row in old_table])
+    all_new_type2_locs = set([row[0] for row in new_table])
+    added_type_2_locs = sorted(all_new_type2_locs - old_type2_locs)
+
+    for row in wit_report[2:]:
+        if row[0] in added_type_2_locs:
+            # print(row)
+            row.append('ADD')
+
+    return wit_report
+
