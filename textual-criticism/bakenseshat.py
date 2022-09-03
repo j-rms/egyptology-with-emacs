@@ -1446,4 +1446,4 @@ def added_type_2_locs(collation, old_witlist, new_witlist):
     all_new_type2_locs = set([row[0] for row in new_table])
     added_type_2_locs = sorted(all_new_type2_locs - old_type2_locs)
     added_type_2_loc_list = [row for row in new_table if row[0] in added_type_2_locs]
-    return added_type_2_loc_list
+    return [new_table[0]] + (added_type_2_loc_list)
