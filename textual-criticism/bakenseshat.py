@@ -1445,7 +1445,12 @@ def next_wit_report(collation, old_witlist, new_witlist):
     stripped_quartets = t2_weighting_by_quartets_stripped_unweighted(collation, new_witlist)
     wit_report = [[row[0], row[-1]] for row in stripped_quartets]
     wit_report.insert(1, None)
-    wit_report[0].insert(2, 'assessment')
+    wit_report[0].insert(2, 'add?')
+    wit_report[0].insert(3, '(where)')
+    wit_report[0].insert(4, 'goes like')
+    wit_report[0].insert(5, 'topology')
+    wit_report[0].insert(6, 'assessment')
+
 
     new_table = stripped_quartets
     old_table = t2_weighting_by_quartets_stripped_unweighted(collation, old_witlist)
@@ -1453,10 +1458,37 @@ def next_wit_report(collation, old_witlist, new_witlist):
     all_new_type2_locs = set([row[0] for row in new_table])
     added_type_2_locs = sorted(all_new_type2_locs - old_type2_locs)
 
+
     for row in wit_report[2:]:
         if row[0] in added_type_2_locs:
             # print(row)
             row.append('ADD')
+        else:
+            row.append('')
 
+    total_goes_likes = []
+    for index, row in enumerate(wit_report[2:]):
+        goes_likes = []
+        word_to_match = row[1][2] # find the word to match
+        equiv_collation_row = new_table[index + 1]
+        for cell_index, cell in enumerate(equiv_collation_row[1:-1]):
+            if cell[2] == word_to_match:
+                matched_witness_name = new_table[0][cell_index + 1]
+                goes_likes.append(matched_witness_name)
+                total_goes_likes.extend([str(matched_witness_name)])
+        row.append('')
+        row.append(goes_likes)
+
+    goes_likes_counts = []
+    for item in set(total_goes_likes):
+        item_count = total_goes_likes.count(item)
+        goes_likes_counts.append([item, item_count])
+
+    goes_like_counts = sorted(goes_likes_counts, key=lambda x: x[1], reverse=True)
+    wit_report.append(None)
+    wit_report.append(['', '', '', '', 'counts'])
+    for count in goes_like_counts:
+        wit_report.append(['', '', '', '', count])
+                    
     return wit_report
 
