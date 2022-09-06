@@ -1492,3 +1492,13 @@ def next_wit_report(collation, old_witlist, new_witlist):
                     
     return wit_report
 
+def reorder_wit_report(wit_report):
+    """Reorders a witness report according to the topology indications"""
+    new_tab = [wit_report[0], None]
+    pre_ordered_tab = []
+    for row in wit_report[1:]:
+        if row != None:
+            pre_ordered_tab.append(row)
+    sorted_tab = sorted(pre_ordered_tab, key=lambda x: x[5])
+    new_tab.extend(sorted_tab)
+    return new_tab
