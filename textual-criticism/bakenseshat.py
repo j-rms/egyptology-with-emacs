@@ -1440,16 +1440,42 @@ def added_type_2_locs(collation, old_witlist, new_witlist):
     added_type_2_loc_list = [row for row in new_table if row[0] in added_type_2_locs]
     return [new_table[0]] + (added_type_2_loc_list)
 
+
+def list_variants(wbq_str_unw, index):
+    """returns a list of variants for a given row number of the collation, in a t2_weighting_by_quartets_stripped_unweighted table"""
+    line_of_interest = [row for row in wbq_str_unw if row[0] == index][0]
+    line_of_interest_stripped = [item[2] for item in line_of_interest[1:] if item[2] not in ["[...]", "‑", "‑‑"]] # do not include fully lacunose witnesses here, or witnesses with significant or insignificant omissions.
+    witline = wbq_str_unw[0][1:]
+    reads = set(line_of_interest_stripped) # the set of available readings
+    ret_list = sorted([[read,[]] for read in reads])
+    wit_reads = list(zip(witline, line_of_interest_stripped)) # list of each individual witness's reading, in the format (witness, reading)
+    for item in wit_reads:
+        witname = item[0]
+        witread = item[1]
+        for item in ret_list:
+            if witread == item[0]:
+                item[1].append(witname)
+    str_ret_list = ""
+    for cell in ret_list:
+        witness_string = ""
+        for witness in cell[1]:
+            witness_string = witness_string + witness + " "
+        string_cell = "▌" + " *" + str(cell[0]) + "* " + ": " + witness_string + "▐"
+        str_ret_list = str_ret_list + string_cell
+    return str_ret_list
+
 def next_wit_report(collation, old_witlist, new_witlist):
     """returns a blank next witness report for the collation (i.e. for the last witness in the collation)"""
     stripped_quartets = t2_weighting_by_quartets_stripped_unweighted(collation, new_witlist)
     wit_report = [[row[0], row[-1]] for row in stripped_quartets]
     wit_report.insert(1, None)
     wit_report[0].insert(2, 'add?')
-    wit_report[0].insert(3, '(where)')
+    wit_report[0].insert(3, 'topology')
     wit_report[0].insert(4, 'goes like')
-    wit_report[0].insert(5, 'topology')
-    wit_report[0].insert(6, 'assessment')
+    wit_report[0].insert(5, '[...]')
+    wit_report[0].insert(6, 'variants')
+    wit_report[0].insert(7, '‑‑')
+    wit_report[0].insert(8, '‑')
 
 
     new_table = stripped_quartets
@@ -1467,8 +1493,12 @@ def next_wit_report(collation, old_witlist, new_witlist):
             row.append('')
 
     total_goes_likes = []
+    total_lacunoses = []
     for index, row in enumerate(wit_report[2:]):
         goes_likes = []
+        lacunoses = []
+        sig_oms = []
+        insig_oms = []
         word_to_match = row[1][2] # find the word to match
         equiv_collation_row = new_table[index + 1]
         for cell_index, cell in enumerate(equiv_collation_row[1:-1]):
@@ -1476,12 +1506,26 @@ def next_wit_report(collation, old_witlist, new_witlist):
                 matched_witness_name = new_table[0][cell_index + 1]
                 goes_likes.append(matched_witness_name)
                 total_goes_likes.extend([str(matched_witness_name)])
+            if cell[2] == '[...]':
+                matched_witness_name = new_table[0][cell_index + 1]
+                lacunoses.append(matched_witness_name)
+                total_lacunoses.extend([str(matched_witness_name)])
+            if cell[2] == '‑':
+                matched_witness_name = new_table[0][cell_index + 1]
+                insig_oms.append(matched_witness_name)
+            if cell[2] == '‑‑':
+                matched_witness_name = new_table[0][cell_index + 1]
+                sig_oms.append(matched_witness_name)
         row.append('')
         row.append(goes_likes)
+        row.append(lacunoses)
+        row.append(list_variants(stripped_quartets, row[0]))
+        row.append(sig_oms)
+        row.append(insig_oms)
 
     goes_likes_counts = []
     for item in set(total_goes_likes):
-        item_count = total_goes_likes.count(item)
+        item_count = total_goes_likes.count(item) - total_lacunoses.count(item)
         goes_likes_counts.append([item, item_count])
 
     goes_like_counts = sorted(goes_likes_counts, key=lambda x: x[1], reverse=True)
@@ -1499,6 +1543,6 @@ def reorder_wit_report(wit_report):
     for row in wit_report[1:]:
         if row != None:
             pre_ordered_tab.append(row)
-    sorted_tab = sorted(pre_ordered_tab, key=lambda x: x[5])
+    sorted_tab = sorted(pre_ordered_tab, key=lambda x: x[3]) # reorder according to topology row
     new_tab.extend(sorted_tab)
     return new_tab
