@@ -18,7 +18,7 @@
   (interactive "MEdge label: ")
   (let ((edge-label (concat edge " [label=")))
     (beginning-of-buffer)
-    (search-forward edge-label nil t)
+    (search-forward edge-label nil nil)
     (beginning-of-line)
     (recenter-top-bottom)
     (recenter-top-bottom)
