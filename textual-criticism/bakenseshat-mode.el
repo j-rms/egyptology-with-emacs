@@ -10,7 +10,7 @@
      (insert "(" rownum ") " smol-node " " sn-reading " / " big-node " " bn-reading)
      )
 
-(global-set-key (kbd "C-c e") 'bks/insert-edge-note)
+
 
 
 (defun bks/find-edge (edge)
@@ -121,7 +121,104 @@
     (end-of-line)
     (newline)
     (newline)
-    (insert next-node-name " [label=\"" next-node-name ".\n\n\" shape=box]")
-    (previous-line)))
+    (insert next-node-name " [label=\"" next-node-name ".\n\" shape=box]")
+    (beginning-of-line)))
 
 (global-set-key (kbd "C-c d") 'bks/make-next-node)
+
+
+                                        ; functions for parsing in a
+                                        ; row line, to try to make
+                                        ; entering row info a bit
+                                        ; quicker:
+
+(defun bks/parse-rowline (rowline)
+  "parses a row line into a list"
+  (let* ((first-node (cadr (split-string rowline " " t)))
+         (second-node (car (split-string (cadr (split-string rowline "/ " t)) " ")))
+         (first-variant (string-join (cdr (split-string (cadr (split-string (car (split-string rowline " / ")) ") ")) " " t)) " "))
+         (second-variant (string-join (cdr (split-string (car (cdr (split-string rowline " / "))) " ")) " "))
+         (rownum (car (split-string rowline " "))))
+    (list rownum first-node first-variant second-node second-variant)))
+
+(defun bks/test-if-rowline (rowline)
+  "test if string is a rowline"
+  (if (equal (car (split-string rowline "" t)) "(")
+      t
+    nil))
+
+(defun bks/test-if-edge-top (rowline)
+  "test if string is the top of an edge block (because contains `[label=')"
+  (if (cl-search "[label=" rowline)
+      t
+    nil))
+
+(defun bks/test-if-edge-bottom (rowline)
+  "test if string is the bottom of an edge block (because contains `shape=box]')"
+  (if (cl-search "shape=box]" rowline)
+      t
+    nil))
+
+(defun bks/move-to-edge-first-rowline ()
+  "when point is within an edge block, move to the edge block's first rowline"
+  (interactive)
+  (let ((line (thing-at-point 'line t)))
+    (unless (bks/test-if-edge-top line)
+      (search-backward "[label="))
+    (while (not (bks/test-if-rowline (thing-at-point 'line t)))
+      (forward-line))))
+
+(defun bks/insert-edge-note-from-rowline(node1 node2)
+     (interactive)
+     (search-backward "[label=")
+     (beginning-of-line)
+     (forward-line)
+     (let ((rownum (read-string "Row number: ")))
+       (bks/move-point-to-rownum-helper (string-to-number rownum))
+       (insert "(" rownum ") " node1 " "))
+     (let* ((node1prompt (concat node1 "'s variant: "))
+            (reading1 (read-string node1prompt)))
+       (insert reading1 " / " node2 " "))
+     (let* ((node2prompt (concat node2 "'s variant: "))
+            (reading2 (read-string node2prompt)))
+       (insert reading2)))
+
+(defun bks/find-or-make-a-rowline ()
+  "Find the first rowline below the edge heading, or make one"
+  (interactive)
+  (search-backward "[label=")
+  (beginning-of-line)
+  (forward-line)
+  (while (or (equal "
+" (substring (thing-at-point 'line t) 0 1))
+             (equal ":" (substring (thing-at-point 'line t) 0 1)))
+    (forward-line)) ; get past the headings
+  (let ((line (thing-at-point 'line t)))
+    (if (bks/test-if-edge-bottom line) ; if you have now reached the bottom:
+        ;; get the two node names and bung in the node-line:
+        (progn
+          (let ((node1 (read-string "Node 1: "))
+                (node2 (read-string "Node 2: ")))
+            (bks/insert-edge-note-from-rowline node1 node2)))
+      ;; you should be on a rowline, but let's just test in case you're not:
+      (if (bks/test-if-rowline line)
+          (bks/insert-edge-note-better)
+        (message "I got confused and don't know where I am."))
+              )))
+
+(defun bks/insert-edge-note-better ()
+  "Better way to insert edge notes: tries to prefill the values of the current node, and prompts if not possible"
+  (interactive)
+  (let* ((line (thing-at-point 'line t)))
+    (message "%s" line)
+    ;; if you're on a rowline:
+    (if (bks/test-if-rowline line)
+        (let* ((rowline (bks/parse-rowline(thing-at-point 'line t)))
+               (node1 (nth 1 rowline))
+               (node2 (nth 3 rowline)))
+          (message "rowline: %s node1: %s node2: %s" rowline node1 node2)
+          (bks/insert-edge-note-from-rowline node1 node2))
+      ;; otherwise, try to find a rowline:
+      (bks/find-or-make-a-rowline))))
+
+(global-set-key (kbd "C-c e") 'bks/insert-edge-note-better)
