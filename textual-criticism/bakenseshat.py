@@ -1444,7 +1444,8 @@ def added_type_2_locs(collation, old_witlist, new_witlist):
 def list_variants(wbq_str_unw, index):
     """returns a list of variants for a given row number of the collation, in a t2_weighting_by_quartets_stripped_unweighted table"""
     line_of_interest = [row for row in wbq_str_unw if row[0] == index][0]
-    line_of_interest_stripped = [item[2] for item in line_of_interest[1:] if item[2] not in ["[...]", "‑", "‑‑"]] # do not include fully lacunose witnesses here, or witnesses with significant or insignificant omissions.
+    # line_of_interest_stripped = [item[2] for item in line_of_interest[1:] if item[2] not in ["[...]", "‑", "‑‑"]] # do not include fully lacunose witnesses here, or witnesses with significant or insignificant omissions.
+    line_of_interest_stripped = [item[2] for item in line_of_interest[1:]]
     witline = wbq_str_unw[0][1:]
     reads = set(line_of_interest_stripped) # the set of available readings
     ret_list = sorted([[read,[]] for read in reads])
@@ -1457,11 +1458,13 @@ def list_variants(wbq_str_unw, index):
                 item[1].append(witname)
     str_ret_list = ""
     for cell in ret_list:
-        witness_string = ""
-        for witness in cell[1]:
-            witness_string = witness_string + witness + " "
-        string_cell = "▌" + " *" + str(cell[0]) + "* " + ": " + witness_string + "▐"
-        str_ret_list = str_ret_list + string_cell
+        if cell[0] not in ["[...]", "‑", "‑‑"]:
+            print(cell)
+            witness_string = ""
+            for witness in cell[1]:
+                witness_string = witness_string + witness + " "
+            string_cell = "▌" + " *" + str(cell[0]) + "* " + ": " + witness_string + "▐"
+            str_ret_list = str_ret_list + string_cell
     return str_ret_list
 
 def next_wit_report(collation, old_witlist, new_witlist):
@@ -1517,11 +1520,11 @@ def next_wit_report(collation, old_witlist, new_witlist):
                 matched_witness_name = new_table[0][cell_index + 1]
                 sig_oms.append(matched_witness_name)
         row.append('')
-        row.append(goes_likes)
-        row.append(lacunoses)
+        row.append(" ".join(goes_likes))
+        row.append(" ".join(lacunoses))
         row.append(list_variants(stripped_quartets, row[0]))
-        row.append(sig_oms)
-        row.append(insig_oms)
+        row.append(" ".join(sig_oms))
+        row.append(" ".join(insig_oms))
 
     goes_likes_counts = []
     for item in set(total_goes_likes):
