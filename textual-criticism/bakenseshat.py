@@ -37,7 +37,7 @@ be meaningfully used to calculate their Hamming distance."""
         comparable_parts_list = []
         for position in range(len(wit1)):
             pair = [wit1[position], wit2[position]]
-            if not lacuna_p(pair[0]) or not lacuna_p(pair[1]): # disregard lacunae
+            if not lacuna_p(pair[0]) and not lacuna_p(pair[1]): # disregard lacunae
                 if not omission_p(pair[0]) and not omission_p(pair[1]): # disregard shared omissions
                     comparable_parts_list.append(pair)
         return comparable_parts_list
@@ -838,7 +838,9 @@ def lacunosity(text):
     for word in text:
         if '[' in word:
             lacunae_counter = lacunae_counter + 1
-        if '‑' == word or '‑‑' == word:
+        if '‑' == word:
+            omission_counter = omission_counter + 1
+        if  '‑‑' in word: # changed from == to allow tracking of multiple types of significant omissions in a single row (e.g. an isolated omission vs. an omission spanning several lines)
             omission_counter = omission_counter + 1
     percentage = round(lacunae_counter / (len(text) - omission_counter) * 100, 2)
     lacunosity_description = [len(text) - omission_counter, lacunae_counter, percentage]
