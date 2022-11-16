@@ -308,28 +308,37 @@ def n_j_to_graphviz(n_j_output):
         distance_1 = str(round(row[1][1], 3))
         connection_2 = str(row[2][0])
         distance_2 = str(round(row[2][1], 3))
-        graphviz_line_1 = node + ' -- "' + connection_1 + '" [ label="' + distance_1 + '",minlen=30 ];'
-        graphviz_line_2 = node + ' -- "' + connection_2 + '" [ label="' + distance_2 + '",minlen=30 ];'
+        graphviz_line_1 = node + ' -- "' + connection_1 + '" [ label="' + distance_1 + '",minlen=30,shape=oval ];'
+        graphviz_line_2 = node + ' -- "' + connection_2 + '" [ label="' + distance_2 + '",minlen=30,shape=oval ];'
         if graphviz_line_1 == graphviz_line_2: # deal with final entry of the table
             return [graphviz_line_1]
         else:
             return [graphviz_line_1, graphviz_line_2]
     # main body
     # graphviz_lines = ['graph G {', 'overlap = false;', 'splines = true']
-    graphviz_lines = ['graph G {', 'overlap=prism', 'overlap_scaling=2', 'ratio=1', 'splines = true'] # more compact
+    graphviz_lines = ['graph G {', 'node [fontname="Charis SIL"]', 'edge [fontname="Charis SIL"]', 'overlap=prism', 'overlap_scaling=2', 'ratio=1', 'splines = true'] # more compact
 
     for row in n_j_output:
         graphviz_lines.extend(write_line(row))
     graphviz_lines.append('}')
     for row in graphviz_lines:
         print(row)
-    return
+    return graphviz_lines
 
 def nj_topology(collation):
     return neighbour_joiner(dist_matrix_to_list(dist_matrix(collation)), [], 1)
 
 def nj_graphviz(collation):
     return n_j_to_graphviz(nj_topology(collation))
+
+def nj_pdf(col, path_and_name):
+    graph_lines = nj_graphviz(col)
+    final_string = ""
+    for line in graph_lines:
+        final_string = final_string + line + "\n"
+    from graphviz import Source
+    s = Source(final_string, filename=path_and_name, format="pdf", engine="neato")
+    return s.render()
 
 # ------------------------------------------------------------------------------
 # SEMIAUTOMATED TEXTUAL CRITICISM FUNCTIONS
@@ -735,6 +744,23 @@ def fill_collation(collation, refcolnum):
         filled_collation.append(filled_row)
     return filled_collation
 
+def number_collation(collation):
+    """takes a collation and renumbers it by row"""
+    filled_collation = []
+    rownum = 0
+    for row in collation:
+        filled_row = []
+        cellnum = 0
+        for cell in row:
+            if cellnum == 0:
+                filled_row.append(rownum)
+                cellnum = cellnum + 1
+                rownum = rownum + 1
+            else:
+                filled_row.append(cell)
+        filled_collation.append(filled_row)
+    return filled_collation
+
 def ref_collation(raw_collation, filled_collation):
     """takes a raw and a filled collation; returns a reference collation that uses both sets of reference numbers"""
     new_col = []
@@ -840,7 +866,7 @@ def lacunosity(text):
             lacunae_counter = lacunae_counter + 1
         if '‑' == word:
             omission_counter = omission_counter + 1
-        if  '‑‑' in word: # changed from == to allow tracking of multiple types of significant omissions in a single row (e.g. an isolated omission vs. an omission spanning several lines)
+        if  '‑‑' in word: # changed from == to allow tracking of multiple types of significant omissions in a single row (e.g. an isolated omission vs. an omission spanning several lines), by appending a number to ‑‑.
             omission_counter = omission_counter + 1
     percentage = round(lacunae_counter / (len(text) - omission_counter) * 100, 2)
     lacunosity_description = [len(text) - omission_counter, lacunae_counter, percentage]
