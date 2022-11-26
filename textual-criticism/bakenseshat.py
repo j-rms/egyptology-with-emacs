@@ -2,6 +2,12 @@
 # BAKENSESHAT: tools for Egyptological textual criticism
 # ------------------------------------------------------------------------------
 
+import matplotlib
+import matplotlib.pyplot
+import numpy
+import statistics
+import math
+
 def rotate_collation(collation):
     """rotates collation 90 degrees anticlockwise, so that each witness is
 its own list"""
@@ -331,14 +337,85 @@ def nj_topology(collation):
 def nj_graphviz(collation):
     return n_j_to_graphviz(nj_topology(collation))
 
-def nj_pdf(col, path_and_name):
+def nj_pdf(col, file_name, work_name, caption_postscript):
     graph_lines = nj_graphviz(col)
     final_string = ""
     for line in graph_lines:
         final_string = final_string + line + "\n"
     from graphviz import Source
-    s = Source(final_string, filename=path_and_name, format="pdf", engine="neato")
-    return s.render()
+    s = Source(final_string, filename=file_name, format="pdf", engine="neato")
+    s.render()
+    caption = "#+caption: Neighbour-joiner chain for " + work_name + ". " + caption_postscript
+    return caption + '\n' + '#+name: ' + file_name.rsplit('.', maxsplit=1)[0] + '\n#+attr_latex: :placement [t] :width \\textwidth' + '\n' + 'file:' + file_name + ".pdf"
+
+
+def nj_autoreport(work_name, file_dir, col, lac_threshold):
+    autoreport = ""
+    file_name = work_name.replace(" ", "_")
+    if file_dir[-1] != '/':
+        file_dir = file_dir + '/'
+    file_path = file_dir + file_name
+    # lacunosity graph
+    lac_file_name = file_path + "_lac_chart.pdf"
+    lac_chartt = lac_chart(col, 'Charis SIL', lac_file_name, '', 4.5, 7.5, work_name)
+    autoreport = autoreport + lac_chartt
+    # scatter graph
+    matplotlib.pyplot.figure(figsize=(6.4,4.8))
+    scat_file_name = file_path + "_lact_scatter.pdf"
+    stripped_col = strip_lacunose_witnesses(col, lac_threshold)
+    scat_strip_amount = 'witness pair: witnesses ≥ ' + str(lac_threshold) + '% lacunose omitted'
+    scat_chart = scatter_2_cols(col, stripped_col, 'witness pair: full collation', scat_strip_amount, 'Charis SIL', scat_file_name)
+    autoreport = autoreport + "\n \n" + scat_chart
+    # neighbour joining full collation
+    full_nj_file_name = file_path + "_nj_full"
+    full_nj = nj_pdf(col, full_nj_file_name, work_name, "All witnesses.")
+    autoreport = autoreport + "\n \n" + full_nj
+    # neighbour joining lac-threshold collation
+    cut_nj_file_name = file_path + "_nj_cut"
+    cut_nj_post_caption = "Witnesses ≥ " + str(lac_threshold) + " lacunose removed."
+    cut_nj = nj_pdf(stripped_col, cut_nj_file_name, work_name, cut_nj_post_caption)
+    autoreport = autoreport + "\n \n" + cut_nj
+    return autoreport
+
+def nj_lac_explore(col, low, high, step, filename):
+    """given a collation, an upper and lower threshold, and a step value, generate scatter charts and neighbour-joined chains for each step value"""
+    explore_report = ""
+    matplotlib.pyplot.figure(figsize=(6.4,4.8))
+    for lac_threshold in numpy.arange(low, high, step):
+        # generate the stripped collation (omitting all witnesses over lac_threshold):
+        stripped_col = strip_lacunose_witnesses(col, lac_threshold)
+        # generate the scatter chart comparing the stripped collation with the full collation:
+        scat_file_name = filename + "_EXPLORE_" + str(lac_threshold) + "_scat.pdf"
+        scat_strip_amount = 'witness pair: witnesses ≥ ' + str(lac_threshold) + '% lacunose omitted'
+        scat_chart = scatter_2_cols(col, stripped_col, 'witness pair: full collation', scat_strip_amount, 'Charis SIL', scat_file_name)
+        # generate the neighbour-joined chain for the stripped collation:
+        cut_nj_file_name = filename + "_EXPLORE_" + str(lac_threshold) + "_nj"
+        cut_nj_post_caption = "Witnesses ≥ " + str(lac_threshold) + " lacunose removed."
+        cut_nj = nj_pdf(stripped_col, cut_nj_file_name, filename, cut_nj_post_caption)
+        # update explore_report:
+        explore_report = explore_report + scat_chart + "\n" + cut_nj + "\n \n"
+    return explore_report
+
+def rob_one_out(col, filename, workname):
+    """given a collation, create nj chains where each chain omits one of the collation's witnesses (robustness check)"""
+    namelist = col[0][1:]
+    rob_report = str(namelist) + "\n \n"
+    # return the full collation
+    subset_file_name = filename + "_rob_" + "000"
+    subset_post_caption = "No witnesses removed."
+    robbed_nj = nj_pdf(col, subset_file_name, workname, subset_post_caption)
+    rob_report = rob_report + "\n \n" + robbed_nj
+    
+    for name in namelist:
+        new_namelist = [word for word in namelist if word != name]
+        new_col = sub_col_rownums(col, new_namelist) # make a new sub-collation without that witness
+        # produce nj chain for that witness subset;
+        subset_file_name = filename + "_rob_" + name.replace(" ", "_")
+        subset_post_caption = name + " removed."
+        robbed_nj = nj_pdf(new_col, subset_file_name, workname, subset_post_caption)
+        rob_report = rob_report + "\n \n" + robbed_nj
+    return rob_report
+
 
 # ------------------------------------------------------------------------------
 # SEMIAUTOMATED TEXTUAL CRITICISM FUNCTIONS
@@ -945,7 +1022,7 @@ def diff_table(collation):
         diff_table.append(diff_table_line)
     return diff_table
 
-import statistics
+
 
 def get_mean_units(diff_table):
     """takes a diff_table made with diff_table(); returns the mean number of units (i.e. words) used to produce the Hamming distances in the table"""
@@ -1076,8 +1153,6 @@ def get_statistics(col, rounding, stripping_threshold, witness_list, population_
 # MATPLOTLIB FUNCTIONS
 # ------------------------------------------------------------------------------
 
-import matplotlib
-import matplotlib.pyplot
 
 # Use the histogram functions within a python source block where the
 # results are written to a drawer (:results value drawer): this
@@ -1227,7 +1302,7 @@ def scatter_2_cols(col1, col2, label1, label2, font, filename):
     return '#+caption: ' + caption + '\n' + '#+name: ' + filename.rsplit('.', maxsplit=1)[0] + '\n#+attr_latex: :placement [t]' + '\n' + 'file:' + filename
 
 from itertools import cycle
-import math
+
 
 def scatter_3_cols(col1, col2, col3, label1, label2, label3, font, filename, caption_postscript, plot_lines_p):
     units1 = get_units(diff_table(col1))
@@ -1345,9 +1420,9 @@ def scatter_3_cols_scaled(col1, col2, col3, label1, label2, label3, font, filena
     caption = "Scatter graph: Hamming distances for " + label1 + " vs. " + label2 + " vs. " + label3 + ". " + caption_postscript
     return '#+caption: ' + caption + '\n' + '#+name: ' + filename.rsplit('.', maxsplit=1)[0] + '\n#+attr_latex: :placement [t]' + '\n' + 'file:' + filename
 
-import numpy
 
-def lac_chart(collation, font, filename, caption_postscript, width, height):
+
+def lac_chart(collation, font, filename, caption_postscript, width, height, work_name):
     """Returns a bar chart giving lacunosity values for <col>'s witnesses"""
     lac_table = lacunosity_table(collation)
     witnesses = [row[0] for row in lac_table[2:]]
@@ -1368,10 +1443,11 @@ def lac_chart(collation, font, filename, caption_postscript, width, height):
     for index,data in enumerate(lengths):
         if pc_lacs[index] != 0.0:
             matplotlib.pyplot.text(x = data, y = index, s = f"{pc_lacs[index]}%", color='black', ha='right', va='center_baseline', fontsize='small')
-    matplotlib.pyplot.legend(loc='best')
+    #matplotlib.pyplot.legend(loc='best')
+    matplotlib.pyplot.legend(loc='upper center', bbox_to_anchor=(0.5, 1.07), ncol=2)
     matplotlib.pyplot.xlabel('№ variation places')
     matplotlib.pyplot.savefig(filename, format='pdf', bbox_inches='tight')
-    caption = 'Extant and lacunose variation places per witness.'
+    caption = 'Witness lacunosity for ' + work_name + '.'
     return '#+caption: ' + caption + '\n' + '#+name: ' + filename.rsplit('.', maxsplit=1)[0] + '\n#+attr_latex: :placement [t]' + '\n' + 'file:' + filename
     return witnesses
 
@@ -1577,3 +1653,20 @@ def reorder_wit_report(wit_report):
     sorted_tab = sorted(pre_ordered_tab, key=lambda x: x[3]) # reorder according to topology row
     new_tab.extend(sorted_tab)
     return new_tab
+
+# ------------------------------------------------------------------------------
+# COLLATION SEARCH FUNCTIONS
+# ------------------------------------------------------------------------------
+
+def str_in_row_p(col, string_list):
+    """return all rows containing at least one instance of a string as part of the contents of at least one cell"""
+    subcol = [col[0]]
+    for row in col[1:]:
+        include_row_p = False
+        for cell in row:
+            for string in string_list:
+                if string in str(row):
+                    include_row_p = True
+        if include_row_p == True:
+            subcol.append(row)
+    return subcol
