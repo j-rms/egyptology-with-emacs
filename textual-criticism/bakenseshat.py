@@ -410,7 +410,7 @@ def rob_one_out(col, filename, workname):
         new_namelist = [word for word in namelist if word != name]
         new_col = sub_col_rownums(col, new_namelist) # make a new sub-collation without that witness
         # produce nj chain for that witness subset;
-        subset_file_name = filename + "_rob_" + name.replace(" ", "_")
+        subset_file_name = filename + "_rob_" + name.replace(" ", "_").replace(".", "_")
         subset_post_caption = name + " removed."
         robbed_nj = nj_pdf(new_col, subset_file_name, workname, subset_post_caption)
         rob_report = rob_report + "\n \n" + robbed_nj
@@ -1683,3 +1683,12 @@ def str_in_row_p(col, string_list):
         if include_row_p == True:
             subcol.append(row)
     return subcol
+
+def detect_empties(col):
+    """return a list of the lines in which a collation has empty cells"""
+    rownums = []
+    for row in col[1:]:
+        for cell in row:
+            if str(cell) == "":
+                rownums.append(row[0])
+    return rownums
