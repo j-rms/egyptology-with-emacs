@@ -416,6 +416,19 @@ def rob_one_out(col, filename, workname):
         rob_report = rob_report + "\n \n" + robbed_nj
     return rob_report
 
+def col_rep_string(col, str1, str2):
+    """in the collation COL, every time the string STR1 appears in a cell, replace it with STR2"""
+    new_col = [col[0]]
+    for row in col[1:]:
+        new_row = []
+        new_row.append(row[0])
+        for cell in row[1:]:
+            contents = str(cell)
+            contents = contents.replace(str1, str2)
+            new_row.append(contents)
+        new_col.append(new_row)
+    return new_col
+
 
 # ------------------------------------------------------------------------------
 # SEMIAUTOMATED TEXTUAL CRITICISM FUNCTIONS
