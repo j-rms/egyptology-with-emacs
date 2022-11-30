@@ -430,6 +430,58 @@ def col_rep_string(col, str1, str2):
     return new_col
 
 
+def n_chunk(col, chunks):
+    """split a collation into n chunks, and return each chunk as its own sublist, with a sublist containing just the names as the first item in the whole list"""
+    chunk_size = round(len(col[1:]) / chunks) # note that this will
+                                                # not produce quite
+                                                # equal divisions: the
+                                                # final chunk could be
+                                                # quite a bit larger
+                                                # or smaller due to
+                                                # rounding.
+
+    chunked_col = [[col[0]]]
+    startpoint = 1
+    for chunk in range(chunks):
+        chunk_start = startpoint
+        chunk_end = startpoint + chunk_size
+        startpoint = chunk_end
+        new_chunk = col[chunk_start:chunk_end]
+        chunked_col.append([new_chunk])
+    return chunked_col
+
+def remove_chunks(col, chunks):
+    """given a collation COL, generate CHUNKS copies with CHUNKS% of the collation removed in each copy, starting with the first CHUNK% of the collation and working through it, and output as a list of lists"""
+    col_heading = col[0]
+    col_chunks = n_chunk(col, chunks)[1:]
+    col_chunks_removed = []
+    for ignore_sublist in col_chunks:
+        col_a_chunk_removed = [col[0]]
+        for sublist in col_chunks:
+            if ignore_sublist != sublist:
+                for row in sublist:
+                    col_a_chunk_removed.extend(row)
+        col_chunks_removed.append(col_a_chunk_removed)
+    return col_chunks_removed
+            
+        
+def nj_remove_chunks(col, num_chunks, file_name, work_name, caption_postscript):
+    """Robustness test: produce neighbour-joined PDFs for COL, incrementally removing NUM_CHUNKS% of the collation"""
+    collations = remove_chunks(col, num_chunks)
+    counter = 1
+    output = ""
+    this_file_name = file_name + "_remove_" +str(num_chunks) + "_chunks_NONE_REMOVED"
+    full_postscript = "Removing " + str(round(100 / num_chunks)) + "% chunks incrementally: no chunks removed. " + caption_postscript
+    output = output + nj_pdf(col, this_file_name, work_name, full_postscript)
+    for collation in collations:
+        this_file_name = file_name + "_remove_" + str(num_chunks) + "_chunks_num_" + str(counter)
+        full_postscript = "Removing " + str(round(100 / num_chunks)) + "% chunks incrementally: chunk " + str(counter) + " of " + str(num_chunks) + " removed. " + caption_postscript
+        output = output + "\n \n" + nj_pdf(collation, this_file_name, work_name, full_postscript)
+        counter = counter + 1
+    return output
+        
+
+
 # ------------------------------------------------------------------------------
 # SEMIAUTOMATED TEXTUAL CRITICISM FUNCTIONS
 # ------------------------------------------------------------------------------
@@ -456,14 +508,14 @@ def type_2_locs(collation):
         """returns True if no element of LINE contains '[', i.e. is lacunose"""
         no_lacuna_p = True
         for item in line:
-            if '[' in item:
+            if '[' in str(item):
                 no_lacuna_p = False
         return no_lacuna_p
     def no_insignificant_omission_p(line):
         """returns True if no element of LINE == '‑' (non-breaking hyphen, not normal - sign!!!), i.e. is an insignificant omission"""
         no_insignificant_omission_p = True
         for item in line:
-            if "‑" == item:
+            if "‑" == str(item):
                 no_insignificant_omission_p = False
         return no_insignificant_omission_p
     # body
@@ -809,6 +861,160 @@ def sort_collation_by_weight(collation, weighting_table):
     sorted_rows = list(reversed(sorted(other_rows)))
     
     return [name_row] + sorted_rows
+
+# ------------------------------------------------------------------------------
+# NEIGHBOUR-JOINING USING QUARTET WEIGHTING
+# ------------------------------------------------------------------------------
+
+def quartet_weighted_proportions(col, namelist):
+    """return a collation weighted by quartets, but with proportions rather than wins vs. attempts"""
+    qweighted_col = t2_weighting_by_quartets(col, namelist)
+    prop_col = [qweighted_col[0]]
+    for row in qweighted_col[1:]:
+        prop_row = [row[0]]
+        for cell in row[1:]:
+            cell_wins = cell[0]
+            cell_tries = cell[1]
+            cell_word = cell[2]
+            prop_weighted_wins = cell_wins / (cell_tries + 1) # by adding 1 to cell_tries, we avoid a divide by 0 error, and we also reward words more that are extremely predictive.
+            new_cell = [prop_weighted_wins, cell_word]
+            prop_row.append(new_cell)
+        prop_col.append(prop_row)
+    return prop_col
+
+# qwp_col = quartet_weighted_proportions(better_col, partial_namelist)
+
+def qw_hamming(wit1, wit2):
+    """calculate the Hamming distance between two quartet-weighted
+transliterations (extracted from a collation created using
+QUARTET_WEIGHTED_PROPORTIONS), expressed as the proportion of
+comparable text that is NOT identical
+
+    """
+    # internal functions:
+    def lacuna_p(a_string):
+        """return True if a_string contains the character '[', which indicates
+it is lacunose"""
+        if '[' in a_string:
+            return True
+        else:
+            return False
+    def omission_p(a_string):
+        """return True if a_string == the character '‑' (non-breaking hyphen, not normal - sign!!!), which indicates it is
+an omission"""
+        if '‑' == a_string:
+            return True
+        else:
+            return False
+
+    def comparable_parts(wit1, wit2):
+        """take two equally long lists of strings; return the parts that can
+be meaningfully used to calculate their Hamming distance."""
+        comparable_parts_list = []
+        for position in range(len(wit1)):
+            pair = [wit1[position][1], wit2[position][1]]
+            significance = (wit1[position][0] + wit2[position][0]) / 2.0
+            if not lacuna_p(pair[0]) and not lacuna_p(pair[1]): # disregard lacunae
+                if not omission_p(pair[0]) and not omission_p(pair[1]): # disregard shared omissions
+                    comparable_parts_list.append([pair, significance])
+        return comparable_parts_list
+
+    def identical_parts(list_of_comparable_parts):
+        """take list produced by comparable_parts(); return list of identical parts"""
+        identical_parts_list = []
+        for item in list_of_comparable_parts:
+            if item[0][0] == item[0][1]:
+                identical_parts_list.append(item)
+        return identical_parts_list
+    
+    def calc_length(comparable_parts_list):
+        """sums the weightings applied to each row and returns the total"""
+        total = 0
+        for row in comparable_parts_list:
+            total = total + row[1]
+        return total
+    # main function body:
+    comparable_length = calc_length(comparable_parts(wit1, wit2))
+    if comparable_length == 0:
+        comparable_length = 0.0000001 # a comparable length of 0 will produce a divide by zero error when calculating hamming_distance below; have to use an extremely small value instead.
+    identical_length = calc_length(identical_parts((comparable_parts(wit1, wit2))))
+    hamming_distance = 1 - (identical_length / comparable_length)
+    return hamming_distance
+
+def qw_dist_matrix(collation):
+    """takes a collation created with QUARTET_WEIGHTED_PROPORTIONS; returns a distance matrix"""
+    # rotate the collation and strip the reference numbers:
+    rot_col = rotate_collation(collation)[1:] # line 0 is just reference numbers, so remove it.
+    # initialize empty distance matrix:
+    dist_matrix = []
+    dist_matrix_top_line = [' '] # top left square should be left blank
+    # add all the witness names to the top line of the distance matrix:
+    for line in rot_col:
+        dist_matrix_top_line.append(line[0])
+    # append the constructed top line to the distance matrix:
+    dist_matrix.append(dist_matrix_top_line)
+    # construct the rest of the distance matrix:
+    for this_witness in rot_col:
+        h_dists = [this_witness[0]] # first item in table should be witness's name.
+        for other_witnesses in rot_col:
+            if other_witnesses[0:] == this_witness[0:]:
+                h_dists.append("itself")
+            else:
+                h_dist = qw_hamming(this_witness[1:], other_witnesses[1:]) # position 0 is just the witness name.
+                h_dists.append(h_dist)
+        dist_matrix.append(h_dists)
+    # remove duplicate entries from the matrix:
+    deduped_dist_matrix = []
+    for line in dist_matrix:
+        deduped_line = []
+        reached_end = False
+        for entry in line:
+            if entry == "itself":
+                reached_end = True
+            if reached_end == False:
+                deduped_line.append(entry)
+        deduped_dist_matrix.append(deduped_line)
+    return deduped_dist_matrix
+
+
+def qw_nj_pdf(col, file_name, work_name, caption_postscript):
+    namelist = col[0][1:]
+    qwp_col = quartet_weighted_proportions(col, namelist)
+    dmatrix = qw_dist_matrix(qwp_col)
+    dlist = dist_matrix_to_list(dmatrix)
+    njed = neighbour_joiner(dlist, [], 1)
+    graph_lines = n_j_to_graphviz(njed)
+    final_string = ""
+    for line in graph_lines:
+        final_string = final_string + line + "\n"
+    from graphviz import Source
+    s = Source(final_string, filename=file_name, format="pdf", engine="neato")
+    s.render()
+    caption = "#+caption: Neighbour-joiner chain for " + work_name + ". " + caption_postscript
+    return caption + '\n' + '#+name: ' + file_name.rsplit('.', maxsplit=1)[0] + '\n#+attr_latex: :placement [t] :width \\textwidth' + '\n' + 'file:' + file_name + ".pdf"
+
+def qw_rob_one_out(col, filename, workname):
+    """given a collation, create nj chains where each chain omits one of the collation's witnesses (robustness check), using quartet weighting"""
+    namelist = col[0][1:]
+    rob_report = str(namelist) + "\n \n"
+    # return the full collation
+    subset_file_name = filename + "_rob_" + "000"
+    subset_post_caption = "No witnesses removed."
+    robbed_nj = qw_nj_pdf(col, subset_file_name, workname, subset_post_caption)
+    rob_report = rob_report + "\n \n" + robbed_nj
+    
+    for name in namelist:
+        new_namelist = [word for word in namelist if word != name]
+        new_col = sub_col_rownums(col, new_namelist) # make a new sub-collation without that witness
+        # produce nj chain for that witness subset;
+        subset_file_name = filename + "_rob_" + name.replace(" ", "_").replace(".", "_")
+        subset_post_caption = name + " removed. Quartet weighting."
+        robbed_nj = qw_nj_pdf(new_col, subset_file_name, workname, subset_post_caption)
+        rob_report = rob_report + "\n \n" + robbed_nj
+    return rob_report
+
+
+
 
 # ------------------------------------------------------------------------------
 # COLLATION FILLING AND FORMATTING FUNCTIONS
@@ -1692,3 +1898,15 @@ def detect_empties(col):
             if str(cell) == "":
                 rownums.append(row[0])
     return rownums
+
+# ------------------------------------------------------------------------------
+# MISC FUNCTIONS
+# ------------------------------------------------------------------------------
+
+def gv_string_to_pdf(gv_string, file_name, work_name, caption_postscript):
+    """produce a pdf from a string containing graphviz code"""
+    from graphviz import Source
+    s = Source(gv_string, filename=file_name, format="pdf", engine="neato")
+    s.render()
+    caption = "#+caption: Neighbour-joiner chain for " + work_name + ". " + caption_postscript
+    return caption + '\n' + '#+name: ' + file_name.rsplit('.', maxsplit=1)[0] + '\n#+attr_latex: :placement [t] :width \\textwidth' + '\n' + 'file:' + file_name + ".pdf"
