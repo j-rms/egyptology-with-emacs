@@ -481,6 +481,14 @@ def nj_remove_chunks(col, num_chunks, file_name, work_name, caption_postscript):
     return output
         
 
+def return_chunk(col, num_chunks, chunk_to_return):
+    """Given a collation, a number of chunks into which to split the collation, and the chunk number to return, return the chunk number headed by a namelist"""
+    chunks = n_chunk(col, num_chunks)
+    chunk = chunks[chunk_to_return][0] # this works because the first item in the list returned by n_chunk, item 0, is the namelist.
+    namelist = chunks[0]
+    namelist.extend(chunk)
+    return namelist
+
 
 # ------------------------------------------------------------------------------
 # SEMIAUTOMATED TEXTUAL CRITICISM FUNCTIONS
@@ -1903,10 +1911,10 @@ def detect_empties(col):
 # MISC FUNCTIONS
 # ------------------------------------------------------------------------------
 
-def gv_string_to_pdf(gv_string, file_name, work_name, caption_postscript):
+def gv_string_to_pdf(gv_string, file_name, work_name, caption_postscript, render_engine):
     """produce a pdf from a string containing graphviz code"""
     from graphviz import Source
-    s = Source(gv_string, filename=file_name, format="pdf", engine="neato")
+    s = Source(gv_string, filename=file_name, format="pdf", engine=render_engine)
     s.render()
     caption = "#+caption: Neighbour-joiner chain for " + work_name + ". " + caption_postscript
     return caption + '\n' + '#+name: ' + file_name.rsplit('.', maxsplit=1)[0] + '\n#+attr_latex: :placement [t] :width \\textwidth' + '\n' + 'file:' + file_name + ".pdf"
