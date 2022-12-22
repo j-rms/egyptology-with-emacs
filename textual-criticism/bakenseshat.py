@@ -1962,14 +1962,15 @@ def wits_agree_others_dont(col, witlist):
 def compare_diffs(col, main_witness, others_witlist):
     """Compare the variation places of MAIN_WITNESS in COL(lation)
     with those in OTHERS_WITLIST"""
+    witlist = [main_witness] + others_witlist
     others_witlist.append(main_witness)
     print(witlist)
-    sub_col_rownums = sub_col_rownums(col, witlist)
-    toprow = sub_col_rownums[0]
+    subcol_rownums = sub_col_rownums(col, witlist)
+    toprow = subcol_rownums[0].append(main_witness + " goes like:")
     combos = list(combinations(witlist, 2))
     variation_places = []
     for combo in combos:
-        combovars = wits_agree_others_dont(sub_col_rownums, combo)
+        combovars = wits_agree_others_dont(subcol_rownums, combo)
         variation_places = variation_places + combovars
     sorted_variation_places = sorted(variation_places, key=lambda x: x[0])
     set_varplaces = list(row for row,_ in groupby(sorted_variation_places))
