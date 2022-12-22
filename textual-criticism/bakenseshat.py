@@ -1942,3 +1942,17 @@ def gv_string_to_pdf(gv_string, file_name, work_name, caption_postscript, render
     s.render()
     caption = "#+caption: Neighbour-joiner chain for " + work_name + ". " + caption_postscript
     return caption + '\n' + '#+name: ' + file_name.rsplit('.', maxsplit=1)[0] + '\n#+attr_latex: :placement [t] :width \\textwidth' + '\n' + 'file:' + file_name + ".pdf"
+
+def wits_agree_others_dont(col, witlist):
+    """return a table showing where the witnesses in WITLIST all agree
+    with each other, but the other witnesses have at least
+    one competing reading"""
+    agreements = [col[0]]
+    coldict = {witness: col[0].index(witness) for witness in col[0][1:]}
+    for row in col[1:]:
+        compare_list = []
+        for witness in witlist:
+            compare_list.append(row[coldict[witness]])
+        if len(set(compare_list)) == 1 and len(set(row[1:])) > 1:
+            agreements.append(row)
+    return agreements
