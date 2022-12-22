@@ -7,6 +7,8 @@ import matplotlib.pyplot
 import numpy
 import statistics
 import math
+from itertools import combinations
+from itertools import cycle
 
 def rotate_collation(collation):
     """rotates collation 90 degrees anticlockwise, so that each witness is
@@ -581,7 +583,6 @@ def type_2_locs(collation):
     final_table.extend(type_2_lines)
     return final_table
 
-from itertools import combinations
 def witness_combos(witness_list):
     combos = []
     for n in range(1, len(witness_list) + 1): 
@@ -1552,7 +1553,7 @@ def scatter_2_cols(col1, col2, label1, label2, font, filename):
     caption = "Scatter graph:  Hamming distances for " + label1 + " vs. " + label2 + "."
     return '#+caption: ' + caption + '\n' + '#+name: ' + filename.rsplit('.', maxsplit=1)[0] + '\n#+attr_latex: :placement [t]' + '\n' + 'file:' + filename
 
-from itertools import cycle
+
 
 
 def scatter_3_cols(col1, col2, col3, label1, label2, label3, font, filename, caption_postscript, plot_lines_p):
