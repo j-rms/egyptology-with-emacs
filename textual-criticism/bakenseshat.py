@@ -124,6 +124,16 @@ name to which it corresponds"""
                 distance_list.append([distance, wit1, wit2])
     return sorted(distance_list)
 
+def round_dlist(dlist, rounding):
+    newlist = []
+    for row in dlist:
+        newlist.append([round(row[0], rounding), row[1], row[2]])
+    return newlist
+
+def rounded_dlist(col, rounding):
+    """takes a COLlation and a ROUNDING number; returns an appropriately rounded distance list"""
+    return round_dlist(dist_matrix_to_list(dist_matrix(col)), rounding)
+
 def unaffected_witnesses(dist_list, wit1, wit2):
     """returns all entries in dist_list which do not contain either wit1 or wit2"""
     unaffected = []
@@ -489,6 +499,20 @@ def return_chunk(col, num_chunks, chunk_to_return):
     namelist.extend(chunk)
     return namelist
 
+def type_2_locs_for_chunk(col, num_chunks, chunk_to_return):
+    """Return just the type-2 variants for the chunk."""
+    namelist = col[0][1:]
+    chunk = return_chunk(col, num_chunks, chunk_to_return)
+    first_rownum = int(chunk[1][0])
+    last_rownum = int(chunk[-1][0])
+    type_2s = type_2_locs(sub_col(col, namelist))
+    # Now build a list of type 2s that fall between first_rownum and last_rownum, inclusive.
+    # don't forget to turn them into integers for comparison!
+    returned_type_2s = [chunk[0]]
+    for row in type_2s:
+        if int(row[0]) >= first_rownum and int(row[0]) <= last_rownum:
+            returned_type_2s.append(row)
+    return returned_type_2s
 
 # ------------------------------------------------------------------------------
 # SEMIAUTOMATED TEXTUAL CRITICISM FUNCTIONS
