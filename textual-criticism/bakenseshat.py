@@ -9,6 +9,7 @@ import statistics
 import math
 from itertools import combinations
 from itertools import cycle
+from itertools import groupby
 
 def rotate_collation(collation):
     """rotates collation 90 degrees anticlockwise, so that each witness is
@@ -1957,3 +1958,41 @@ def wits_agree_others_dont(col, witlist):
         if len(set(compare_list)) == 1 and len(set(row[1:])) > 1:
             agreements.append(row)
     return agreements
+
+def compare_diffs(col, main_witness, others_witlist):
+    """Compare the variation places of MAIN_WITNESS in COL(lation)
+    with those in OTHERS_WITLIST"""
+    others_witlist.append(main_witness)
+    print(witlist)
+    sub_col_rownums = sub_col_rownums(col, witlist)
+    toprow = sub_col_rownums[0]
+    combos = list(combinations(witlist, 2))
+    variation_places = []
+    for combo in combos:
+        combovars = wits_agree_others_dont(sub_col_rownums, combo)
+        variation_places = variation_places + combovars
+    sorted_variation_places = sorted(variation_places, key=lambda x: x[0])
+    set_varplaces = list(row for row,_ in groupby(sorted_variation_places))
+
+    vps_compared = []
+
+    def is_comparable(variant):
+        """returns True if variant is comparable, False, if not"""
+        if "[" not in variant and variant != "‑":
+            return True
+        else:
+            return False
+
+    mainwit_index = set_varplaces[0].index(main_witness)
+    for row in set_varplaces:
+        goeslikes = ""
+        mainwit_reading = row[mainwit_index]
+        reading_index = 0
+        for reading in row:
+            if reading == mainwit_reading and is_comparable(reading):
+                witname = set_varplaces[0][reading_index]
+                if witname != main_witness:
+                    goeslikes = goeslikes + " " + witname
+            reading_index = reading_index + 1
+        row.append(goeslikes)
+    return set_varplaces
