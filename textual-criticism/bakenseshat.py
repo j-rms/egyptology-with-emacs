@@ -10,6 +10,7 @@ import math
 from itertools import combinations
 from itertools import cycle
 from itertools import groupby
+import re
 
 def rotate_collation(collation):
     """rotates collation 90 degrees anticlockwise, so that each witness is
@@ -1046,6 +1047,33 @@ def qw_rob_one_out(col, filename, workname):
         robbed_nj = qw_nj_pdf(new_col, subset_file_name, workname, subset_post_caption)
         rob_report = rob_report + "\n \n" + robbed_nj
     return rob_report
+
+
+def chain_nolengths(chaincode):
+    """Return a CHAINCODE shorn of its length data"""
+    chaincode = re.sub('label.*?,', '', chaincode)
+    listchain = [line for line in chaincode.splitlines()]
+    return listchain
+
+
+
+def chain_collapse_nodes(chaincode, node_list, new_node_name):
+    """Return a CHAINCODE with NODE_LIST collapsed to a single node called new_node_name"""
+    chain_lines = chain_nolengths(chaincode)
+    new_chaincode = ""
+    for line in chain_lines:
+        newline = line
+        if "--" in line: # detect whether it's a line you should be replacing
+            for node in node_list:
+                oldstring = '"' + str(node) + '"'
+                newstring = '"' + str(new_node_name) + '"'
+                newline = newline.replace(oldstring, newstring)
+                # print(newline)
+        if newline.count(new_node_name) != 2:
+            new_chaincode = new_chaincode + newline + "\n"
+            print(newline)
+    print(new_chaincode)
+    return new_chaincode
 
 
 
