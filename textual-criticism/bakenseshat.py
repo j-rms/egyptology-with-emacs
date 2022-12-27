@@ -327,8 +327,8 @@ def n_j_to_graphviz(n_j_output):
         distance_1 = str(round(row[1][1], 3))
         connection_2 = str(row[2][0])
         distance_2 = str(round(row[2][1], 3))
-        graphviz_line_1 = node + ' -- "' + connection_1 + '" [ label="' + distance_1 + '",minlen=30,shape=oval ];'
-        graphviz_line_2 = node + ' -- "' + connection_2 + '" [ label="' + distance_2 + '",minlen=30,shape=oval ];'
+        graphviz_line_1 = '"' + node + '"' + ' -- "' + connection_1 + '" [ label="' + distance_1 + '",minlen=30,shape=oval ];'
+        graphviz_line_2 = '"' + node + '"' + ' -- "' + connection_2 + '" [ label="' + distance_2 + '",minlen=30,shape=oval ];'
         if graphviz_line_1 == graphviz_line_2: # deal with final entry of the table
             return [graphviz_line_1]
         else:
