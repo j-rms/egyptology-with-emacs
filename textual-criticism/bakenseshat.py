@@ -1190,6 +1190,20 @@ def strip_dets(collation, threshold):
     return nodets
 
 # ------------------------------------------------------------------------------
+# STRIP A COLLATION OF () BRACKETS
+# ------------------------------------------------------------------------------
+def strip_brackets(collation):
+    """strip COLLATION of () brackets (to remove orthographic variants of omission)"""
+    stripped = [collation[0]] # start with just the header line.
+    for row in collation[1:]:
+        newrow = []
+        for cell in row:
+            cell = re.sub("[\(\)]", "", str(cell))
+            newrow.append(cell)
+        stripped.append(newrow)
+    return stripped
+
+# ------------------------------------------------------------------------------
 # RETURN ONLY THOSE CELLS OF A COLLATION THAT CONTAIN DETERMINATIVES
 # ------------------------------------------------------------------------------
 def only_dets(collation, threshold):
