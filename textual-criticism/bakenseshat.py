@@ -1812,7 +1812,7 @@ def make_witness_order_table(dates_table, lacunosity_table, max_lac, witlist, st
     return table_headers
 
 def strip_unweighted(weighted_collation):
-    """remove all rows of a weighted collation (created using t2_weighting_by_quartets(sub_col_rownums(col, witlist))) where no cell's weight has been calculated"""
+    """remove all rows of a weighted collation (created using t2_weighting_by_quartets(sub_col_rownums(col, witlist))) where no's weight has been calculated"""
     new_collation = [weighted_collation[0]]
     for row in weighted_collation[1:]:
         no_calcs = True
