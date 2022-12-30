@@ -1075,6 +1075,13 @@ def chain_collapse_nodes(chaincode, node_list, new_node_name):
     print(new_chaincode)
     return new_chaincode
 
+def node_collapser(chain_file, new_file, list_of_lists_of_nodes, work_title, caption):
+    """Given CHAIN_FILE, return NEW_FILE and a drawer of text for ready insertion into a document, with all the node lists in LIST_OF_LIST_OF_NODES individually collapsed."""
+    with open(chain_file, 'r') as file:
+        chain = file.read()
+        for nodelist in list_of_lists_of_nodes:
+            chain = chain_collapse_nodes(chain, nodelist, str(nodelist))
+    return gv_string_to_pdf(chain, new_file, work_title, caption, "neato")
 
 
 
