@@ -2095,7 +2095,32 @@ def sk_dmatrix(distance_matrix):
         skdm.append(newrow)
     return sklearn.utils.check_array(skdm) # return a sklearn-suitable array.
 
-def MDS_plot(col, metric, workname, caption_postscript, filename):
+def MDS_figgen(x, y, xlabel, ylabel, filename, workname, caption_postscript, col, stress, coords, comps):
+    """helper function: generates MDS figures for MDS_2d_plot and MDS_3d_plot"""
+    namelist = col[0][1:]
+
+    # generate the figure:
+    plt.clf()
+    matplotlib.rcParams['font.family'] = 'Charis SIL'
+    matplotlib.rcParams.update({'font.size' : 10})
+    matplotlib.rcParams["figure.figsize"] = (8, 8)
+    matplotlib.pyplot.grid(b=True, which='both', axis='both', linewidth=.5)
+    matplotlib.pyplot.xlabel(xlabel)
+    matplotlib.pyplot.ylabel(ylabel)
+    plt.plot(x, y, 'o', color='black')
+    plt.gca().set_aspect('equal', adjustable='box')
+
+    for num, name in enumerate(namelist):
+        plt.annotate(name, (x[num]+0.004, y[num]+0.004))
+        # plt.show()
+    # save the figure:
+    plt.savefig(filename, format='pdf')
+
+    caption = "MDS plot for " + workname + ": " + str(comps) + " components, stress = " + str(stress) + ". " + caption_postscript
+    return '#+caption: ' + caption + '\n' + '#+name: ' + filename.rsplit('.', maxsplit=1)[0] + '\n#+attr_latex: :placement [t] :width \\textwidth' + '\n' + 'file:' + filename
+
+
+def MDS_2d_plot(col, metric, workname, caption_postscript, filename):
     """return a Multidimensional Scaling two-dimensional graph of the Hamming distance matrix of COL, where METRIC is either True or False"""
 
     # set up MDS for taking a precompiled distance matrix:
@@ -2108,24 +2133,42 @@ def MDS_plot(col, metric, workname, caption_postscript, filename):
 
     # generate the coords:
     coords = mds.fit_transform(X)
-    # nb: if you increase n_components, this will increase the number of dimensions!
+    # nb: if you increase n_components above, this will increase the number of dimensions here!
+    
+    stress = round(mds.stress_, 3) # calculate the stress value, i.e. how much the coordinates fail to represent reality.
 
-    # generate the figure:
+    # assign coordinates to x and y lists:
     x = [cell[0] for cell in coords]
     y = [cell[1] for cell in coords]
-    matplotlib.rcParams['font.family'] = 'Charis SIL'
-    matplotlib.rcParams.update({'font.size' : 10})
-    matplotlib.rcParams["figure.figsize"] = (8, 8)
-    matplotlib.pyplot.grid(b=True, which='both', axis='both', linewidth=.5)
-    plt.clf()
-    plt.plot(x, y, 'o', color='black')
-    plt.gca().set_aspect('equal', adjustable='box')
-    namelist = col[0][1:]
-    for num, name in enumerate(namelist):
-        plt.annotate(name, (x[num]+0.004, y[num]+0.004))
-        # plt.show()
-    # save the figure:
-    plt.savefig(filename, format='pdf')
-    stress = mds.stress_
-    caption = "MDS plot for " + workname + ": " + str(comps) + " components, stress = " + str(stress) + ". " + caption_postscript
-    return '#+caption: ' + caption + '\n' + '#+name: ' + filename.rsplit('.', maxsplit=1)[0] + '\n#+attr_latex: :placement [t] :width \\textwidth' + '\n' + 'file:' + filename
+
+    returned = MDS_figgen(x, y, 'x', 'y', filename + ".pdf", workname, caption_postscript, col, stress, coords, comps)
+    return returned
+
+
+def MDS_3d_plot(col, metric, workname, caption_postscript, filename):
+    """return a Multidimensional Scaling three-dimensional graph of the Hamming distance matrix of COL, where METRIC is either True or False"""
+
+    # set up MDS for taking a precompiled distance matrix:
+    comps = 3
+    from sklearn.manifold import MDS
+    mds = MDS(dissimilarity='precomputed', random_state=0, metric=True, n_components=comps)
+
+    dm = full_dist_matrix(col) # get a full distance matrix of COL
+    X = np.array(sk_dmatrix(dm))
+
+    # generate the coords:
+    coords = mds.fit_transform(X)
+    # nb: if you increase n_components above, this will increase the number of dimensions here!
+    
+    stress = round(mds.stress_, 3)
+
+    # assign coordinates to x and y lists:
+    x = [cell[0] for cell in coords]
+    y = [cell[1] for cell in coords]
+    z = [cell[2] for cell in coords]
+
+    returned_xy = MDS_figgen(x, y, 'Component 1', 'Component 2', filename + "_12.pdf", workname, "Components 1 and 2" + caption_postscript, col, stress, coords, comps)
+    returned_zy = MDS_figgen(y, z, 'Component 2', 'Component 3', filename + "_23.pdf", workname, "Components 2 and 3" + caption_postscript, col, stress, coords, comps)
+    returned_xz = MDS_figgen(x, z, 'Component 1', 'Component 3', filename + "_13.pdf", workname, "Components 1 and 3" + caption_postscript, col, stress, coords, comps)
+    return returned_xy + "\n\n" + returned_zy + "\n\n" + returned_xz
+
