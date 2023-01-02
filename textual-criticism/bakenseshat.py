@@ -101,6 +101,30 @@ def dist_matrix(collation):
         deduped_dist_matrix.append(deduped_line)
     return deduped_dist_matrix
 
+def full_dist_matrix(collation):
+    """takes a standard collation; returns a full distance matrix (i.e. duplicates not removed)"""
+    # rotate the collation and strip the reference numbers:
+    rot_col = rotate_collation(collation)[1:] # line 0 is just reference numbers, so remove it.
+    # initialize empty distance matrix:
+    dist_matrix = []
+    dist_matrix_top_line = [' '] # top left square should be left blank
+    # add all the witness names to the top line of the distance matrix:
+    for line in rot_col:
+        dist_matrix_top_line.append(line[0])
+    # append the constructed top line to the distance matrix:
+    dist_matrix.append(dist_matrix_top_line)
+    # construct the rest of the distance matrix:
+    for this_witness in rot_col:
+        h_dists = [this_witness[0]] # first item in table should be witness's name.
+        for other_witnesses in rot_col:
+            # if other_witnesses[0:] == this_witness[0:]:
+                h_dists.append("itself")
+            else:
+                h_dist = hamming(this_witness[1:], other_witnesses[1:]) # position 0 is just the witness name.
+                h_dists.append(h_dist)
+        dist_matrix.append(h_dists)
+    return dist_matrix
+
 # ------------------------------------------------------------------------------
 # NEIGHBOUR-JOINING FUNCTIONS
 # ------------------------------------------------------------------------------
