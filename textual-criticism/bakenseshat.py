@@ -117,8 +117,8 @@ def full_dist_matrix(collation):
     for this_witness in rot_col:
         h_dists = [this_witness[0]] # first item in table should be witness's name.
         for other_witnesses in rot_col:
-            # if other_witnesses[0:] == this_witness[0:]:
-                h_dists.append("itself")
+            if other_witnesses[0:] == this_witness[0:]:
+                h_dists.append(0)
             else:
                 h_dist = hamming(this_witness[1:], other_witnesses[1:]) # position 0 is just the witness name.
                 h_dists.append(h_dist)
@@ -2070,3 +2070,62 @@ def compare_diffs(col, main_witness, others_witlist):
             reading_index = reading_index + 1
         row.append(goeslikes)
     return set_varplaces
+
+
+# ------------------------------------------------------------------------------
+# MDS FUNCTIONS
+# ------------------------------------------------------------------------------
+import sklearn
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib
+import numpy as np
+
+
+def sk_dmatrix(distance_matrix):
+    dm = distance_matrix
+    skdm = []
+    for row in dm[1:]: # bypass top row of names
+        newrow = []
+        for cell in row[1:]: # bypass name in first cell
+            if cell == "itself":
+                newrow.append(0)
+            else:
+                newrow.append(cell)
+        skdm.append(newrow)
+    return sklearn.utils.check_array(skdm) # return a sklearn-suitable array.
+
+def MDS_plot(col, metric, workname, caption_postscript, filename):
+    """return a Multidimensional Scaling two-dimensional graph of the Hamming distance matrix of COL, where METRIC is either True or False"""
+
+    # set up MDS for taking a precompiled distance matrix:
+    comps = 2
+    from sklearn.manifold import MDS
+    mds = MDS(dissimilarity='precomputed', random_state=0, metric=True, n_components=comps)
+
+    dm = full_dist_matrix(col) # get a full distance matrix of COL
+    X = np.array(sk_dmatrix(dm))
+
+    # generate the coords:
+    coords = mds.fit_transform(X)
+    # nb: if you increase n_components, this will increase the number of dimensions!
+
+    # generate the figure:
+    x = [cell[0] for cell in coords]
+    y = [cell[1] for cell in coords]
+    matplotlib.rcParams['font.family'] = 'Charis SIL'
+    matplotlib.rcParams.update({'font.size' : 10})
+    matplotlib.rcParams["figure.figsize"] = (8, 8)
+    matplotlib.pyplot.grid(b=True, which='both', axis='both', linewidth=.5)
+    plt.clf()
+    plt.plot(x, y, 'o', color='black')
+    plt.gca().set_aspect('equal', adjustable='box')
+    namelist = col[0][1:]
+    for num, name in enumerate(namelist):
+        plt.annotate(name, (x[num]+0.004, y[num]+0.004))
+        # plt.show()
+    # save the figure:
+    plt.savefig(filename, format='pdf')
+    stress = mds.stress_
+    caption = "MDS plot for " + workname + ": " + str(comps) + " components, stress = " + str(stress) + ". " + caption_postscript
+    return '#+caption: ' + caption + '\n' + '#+name: ' + filename.rsplit('.', maxsplit=1)[0] + '\n#+attr_latex: :placement [t] :width \\textwidth' + '\n' + 'file:' + filename
