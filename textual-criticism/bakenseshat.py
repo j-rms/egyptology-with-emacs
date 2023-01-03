@@ -2095,7 +2095,7 @@ def sk_dmatrix(distance_matrix):
         skdm.append(newrow)
     return sklearn.utils.check_array(skdm) # return a sklearn-suitable array.
 
-def MDS_figgen(x, y, xlabel, ylabel, filename, workname, caption_postscript, col, stress, coords, comps):
+def MDS_figgen(x, y, xlabel, ylabel, filename, workname, caption_postscript, col, stress, coords, comps, metric_p, normstress_p):
     """helper function: generates MDS figures for MDS_2d_plot and MDS_3d_plot"""
     namelist = col[0][1:]
 
@@ -2116,18 +2116,27 @@ def MDS_figgen(x, y, xlabel, ylabel, filename, workname, caption_postscript, col
     # save the figure:
     plt.savefig(filename, format='pdf')
 
-    caption = "MDS plot for " + workname + ": " + str(comps) + " components, stress = " + str(stress) + ". " + caption_postscript
+    if metric_p == True:
+        metric_or_nonmetric = "Metric "
+    else:
+        metric_or_nonmetric = "Nonmetric "
+
+    if normstress_p == True:
+        normstressornot = "Normalized"
+    else:
+        normstressornot = "Raw"
+    caption = metric_or_nonmetric + "MDS plot for " + workname + ". " + str(comps) + " components. " + normstressornot + " stress = " + str(stress) + ". " + caption_postscript
     return '#+caption: ' + caption + '\n' + '#+name: ' + filename.rsplit('.', maxsplit=1)[0] + '\n#+attr_latex: :placement [t] :width \\textwidth' + '\n' + 'file:' + filename
 
 
-def MDS_2d_plot(col, metric, workname, caption_postscript, filename):
+def MDS_2d_plot(col, metric_p, normstress_p, workname, caption_postscript, filename):
     """return a Multidimensional Scaling two-dimensional graph of the Hamming distance matrix of COL, where METRIC is either True or False"""
 
     # set up MDS for taking a precompiled distance matrix:
     comps = 2
     from sklearn.manifold import MDS
-    mds = MDS(dissimilarity='precomputed', random_state=0, metric=True, n_components=comps)
-
+    # mds = MDS(dissimilarity='precomputed', random_state=0, metric=metric_p, n_components=comps)
+    mds = MDS(dissimilarity='precomputed', random_state=0, metric=metric_p, n_components=comps, normalized_stress=normstress_p)
     dm = full_dist_matrix(col) # get a full distance matrix of COL
     X = np.array(sk_dmatrix(dm))
 
@@ -2137,21 +2146,28 @@ def MDS_2d_plot(col, metric, workname, caption_postscript, filename):
     
     stress = round(mds.stress_, 3) # calculate the stress value, i.e. how much the coordinates fail to represent reality.
 
+    # rotate the data:
+    # this part taken from: https://scikit-learn.org/stable/auto_examples/manifold/plot_mds.html#example-manifold-plot-mds-py
+    from sklearn.decomposition import PCA
+    clf = PCA(n_components=comps)
+    coords = clf.fit_transform(coords)
+
     # assign coordinates to x and y lists:
     x = [cell[0] for cell in coords]
     y = [cell[1] for cell in coords]
 
-    returned = MDS_figgen(x, y, 'x', 'y', filename + ".pdf", workname, caption_postscript, col, stress, coords, comps)
+    returned = MDS_figgen(x, y, 'Component 1', 'Component 2', filename + ".pdf", workname, caption_postscript, col, stress, coords, comps, metric_p, normstress_p)
     return returned
 
 
-def MDS_3d_plot(col, metric, workname, caption_postscript, filename):
+def MDS_3d_plot(col, metric_p, normstress_p, workname, caption_postscript, filename):
     """return a Multidimensional Scaling three-dimensional graph of the Hamming distance matrix of COL, where METRIC is either True or False"""
 
     # set up MDS for taking a precompiled distance matrix:
     comps = 3
     from sklearn.manifold import MDS
-    mds = MDS(dissimilarity='precomputed', random_state=0, metric=True, n_components=comps)
+    # mds = MDS(dissimilarity='precomputed', random_state=0, metric=metric_p, n_components=comps)
+    mds = MDS(dissimilarity='precomputed', random_state=0, metric=metric_p, n_components=comps, normalized_stress=normstress_p)
 
     dm = full_dist_matrix(col) # get a full distance matrix of COL
     X = np.array(sk_dmatrix(dm))
@@ -2162,13 +2178,78 @@ def MDS_3d_plot(col, metric, workname, caption_postscript, filename):
     
     stress = round(mds.stress_, 3)
 
+    # rotate the data:
+    # this part taken from: https://scikit-learn.org/stable/auto_examples/manifold/plot_mds.html#example-manifold-plot-mds-py
+    from sklearn.decomposition import PCA
+    clf = PCA(n_components=comps)
+    coords = clf.fit_transform(coords)
+
+
     # assign coordinates to x and y lists:
     x = [cell[0] for cell in coords]
     y = [cell[1] for cell in coords]
     z = [cell[2] for cell in coords]
 
-    returned_xy = MDS_figgen(x, y, 'Component 1', 'Component 2', filename + "_12.pdf", workname, "Components 1 and 2" + caption_postscript, col, stress, coords, comps)
-    returned_zy = MDS_figgen(y, z, 'Component 2', 'Component 3', filename + "_23.pdf", workname, "Components 2 and 3" + caption_postscript, col, stress, coords, comps)
-    returned_xz = MDS_figgen(x, z, 'Component 1', 'Component 3', filename + "_13.pdf", workname, "Components 1 and 3" + caption_postscript, col, stress, coords, comps)
+    returned_xy = MDS_figgen(x, y, 'Component 1', 'Component 2', filename + "_12.pdf", workname, "Components 1 and 2. " + caption_postscript, col, stress, coords, comps, metric_p, normstress_p)
+    returned_zy = MDS_figgen(y, z, 'Component 2', 'Component 3', filename + "_23.pdf", workname, "Components 2 and 3. " + caption_postscript, col, stress, coords, comps, metric_p, normstress_p)
+    returned_xz = MDS_figgen(x, z, 'Component 1', 'Component 3', filename + "_13.pdf", workname, "Components 1 and 3. " + caption_postscript, col, stress, coords, comps, metric_p, normstress_p)
     return returned_xy + "\n\n" + returned_zy + "\n\n" + returned_xz
 
+def MDS_3d_plot_just_return_coords(col, metric_p, normstress_p):
+    """return a Multidimensional Scaling three-dimensional graph of the Hamming distance matrix of COL, where METRIC is either True or False"""
+
+    # set up MDS for taking a precompiled distance matrix:
+    comps = 3
+    from sklearn.manifold import MDS
+    # mds = MDS(dissimilarity='precomputed', random_state=0, metric=metric_p, n_components=comps)
+    mds = MDS(dissimilarity='precomputed', random_state=0, metric=metric_p, n_components=comps, normalized_stress=normstress_p)
+
+    dm = full_dist_matrix(col) # get a full distance matrix of COL
+    X = np.array(sk_dmatrix(dm))
+
+    # generate the coords:
+    coords = mds.fit_transform(X)
+    # nb: if you increase n_components above, this will increase the number of dimensions here!
+    
+    stress = round(mds.stress_, 3)
+
+    # rotate the data:
+    # this part taken from: https://scikit-learn.org/stable/auto_examples/manifold/plot_mds.html#example-manifold-plot-mds-py
+    from sklearn.decomposition import PCA
+    clf = PCA(n_components=comps)
+    coords = clf.fit_transform(coords)
+
+
+    # assign coordinates to x and y lists:
+    x = [cell[0] for cell in coords]
+    y = [cell[1] for cell in coords]
+    z = [cell[2] for cell in coords]
+    return [x, y, z]
+
+def MDS_interactive_3d_plot(collation, metric_p, scaled_stress_p):
+    # adapted from https://matplotlib.org/stable/gallery/mplot3d/surface3d.html
+    coords = MDS_3d_plot_just_return_coords(collation, metric_p, scaled_stress_p)
+    # rotate the data:
+    # this part taken from: https://scikit-learn.org/stable/auto_examples/manifold/plot_mds.html#example-manifold-plot-mds-py
+    from sklearn.decomposition import PCA
+    clf = PCA(n_components=3)
+    zippedcoords=list(zip(coords[0], coords[1], coords[2]))
+    zippedcoords = clf.fit_transform(zippedcoords)
+    # print(zippedcoords)
+    
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d import axes3d
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    # X = coords[0]
+    # Y = coords[1]
+    # Z = coords[2]
+    X = [coord[0] for coord in zippedcoords]
+    Y = [coord[1] for coord in zippedcoords]
+    Z = [coord[2] for coord in zippedcoords]
+    namelist = collation[0][1:]
+    for item in list(zip(X, Y, Z, namelist)):
+        ax.plot(item[0], item[1], item[2], marker='o', label='foo')
+        ax.text(item[0], item[1], item[2], item[3], color='black')
+    plt.show(block=False)
+    return 
