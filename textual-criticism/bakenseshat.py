@@ -2264,7 +2264,7 @@ def two_nearest(names, dists):
     return [smallest, next_smallest]
 
 
-def MDS_interactive_3d_plot_lined(collation, metric_p, scaled_stress_p):
+def MDS_interactive_3d_plot_lined(collation, metric_p, scaled_stress_p, workname):
     # parts adapted from https://matplotlib.org/stable/gallery/mplot3d/surface3d.html
     # another part adapted from: https://scikit-learn.org/stable/auto_examples/manifold/plot_mds.html#example-manifold-plot-mds-py
 
@@ -2299,6 +2299,7 @@ def MDS_interactive_3d_plot_lined(collation, metric_p, scaled_stress_p):
         nextnearestname=twonearest[1][0]
         # print(itemname, ": ", nearestname, nextnearestname)
 
+        ax.set_title(workname)
         for nitem in list(zip(X, Y, Z, namelist)):
             if nitem[3] == nearestname:
                 nearestx = nitem[0]
@@ -2317,3 +2318,11 @@ def MDS_interactive_3d_plot_lined(collation, metric_p, scaled_stress_p):
         ax.text(item[0], item[1], item[2], item[3], color='black')
     plt.show(block=False)
     return 
+
+def remove_witnesses(col, witlist):
+    """Return collation COL shorn of all witnesses in WITLIST"""
+    namelist = col[0][1:]
+    for wit in witlist:
+        namelist.remove(wit)
+    subcol = sub_col_rownums(col, namelist)
+    return subcol
