@@ -2253,3 +2253,67 @@ def MDS_interactive_3d_plot(collation, metric_p, scaled_stress_p):
         ax.text(item[0], item[1], item[2], item[3], color='black')
     plt.show(block=False)
     return 
+
+def two_nearest(names, dists):
+    """given NAMES, an ordered list of names, and DISTS, a similarly ordered list of distances, return the names and distances corresponding to the smallest and next-smallest distances"""
+    nd = list(zip(names, dists))
+    new_nd = [pair for pair in nd if pair[1] != 0]
+    new_nd.sort(key=lambda x: x[1]) # sort from smallest to largest distance
+    smallest = new_nd[0] # nd[0] will be the witness itself, with a distance of 0.
+    next_smallest = new_nd[1]
+    return [smallest, next_smallest]
+
+
+def MDS_interactive_3d_plot_lined(collation, metric_p, scaled_stress_p):
+    # parts adapted from https://matplotlib.org/stable/gallery/mplot3d/surface3d.html
+    # another part adapted from: https://scikit-learn.org/stable/auto_examples/manifold/plot_mds.html#example-manifold-plot-mds-py
+
+    coords = MDS_3d_plot_just_return_coords(collation, metric_p, scaled_stress_p)
+    # rotate the data:
+    from sklearn.decomposition import PCA
+    clf = PCA(n_components=3)
+    zippedcoords=list(zip(coords[0], coords[1], coords[2]))
+    zippedcoords = clf.fit_transform(zippedcoords)
+    # print(zippedcoords)
+    
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d import axes3d
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    # X = coords[0]
+    # Y = coords[1]
+    # Z = coords[2]
+    X = [coord[0] for coord in zippedcoords]
+    Y = [coord[1] for coord in zippedcoords]
+    Z = [coord[2] for coord in zippedcoords]
+    namelist = collation[0][1:]
+    distmatrix = full_dist_matrix(collation)[1:]
+    for item in list(zip(X, Y, Z, namelist, distmatrix)):
+
+        itemname=item[3]
+
+        twonearest=two_nearest(namelist, item[4][1:])
+        # print(twonearest)
+        
+        nearestname=twonearest[0][0]
+        nextnearestname=twonearest[1][0]
+        # print(itemname, ": ", nearestname, nextnearestname)
+
+        for nitem in list(zip(X, Y, Z, namelist)):
+            if nitem[3] == nearestname:
+                nearestx = nitem[0]
+                nearesty = nitem[1]
+                nearestz = nitem[2]
+            if nitem[3] == nextnearestname:
+                nextnearestx = nitem[0]
+                nextnearesty = nitem[1]
+                nextnearestz = nitem[2]
+        # print(nearestx, nearesty, nearestz, nextnearestx, nextnearesty, nextnearestz)
+        
+        ax.plot([item[0],nearestx], [item[1], nearesty], [item[2], nearestz], color='black', linestyle='solid', alpha=0.5)
+        ax.plot([item[0],nextnearestx], [item[1], nextnearesty], [item[2], nextnearestz], color='black', linestyle='solid', alpha=0.2)
+
+        ax.plot(item[0], item[1], item[2], marker='o')
+        ax.text(item[0], item[1], item[2], item[3], color='black')
+    plt.show(block=False)
+    return 
