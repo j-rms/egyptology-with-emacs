@@ -2224,7 +2224,7 @@ def MDS_3d_plot_just_return_coords(col, metric_p, normstress_p):
     x = [cell[0] for cell in coords]
     y = [cell[1] for cell in coords]
     z = [cell[2] for cell in coords]
-    return [x, y, z]
+    return [x, y, z, stress]
 
 def MDS_interactive_3d_plot(collation, metric_p, scaled_stress_p):
     # adapted from https://matplotlib.org/stable/gallery/mplot3d/surface3d.html
@@ -2278,6 +2278,8 @@ def MDS_interactive_3d_plot_lined(collation, metric_p, scaled_stress_p, workname
     
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import axes3d
+    matplotlib.rcParams['font.family'] = 'Charis SIL'
+
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     # X = coords[0]
@@ -2299,7 +2301,9 @@ def MDS_interactive_3d_plot_lined(collation, metric_p, scaled_stress_p, workname
         nextnearestname=twonearest[1][0]
         # print(itemname, ": ", nearestname, nextnearestname)
 
-        ax.set_title(workname)
+        # stress = round(mds.stress_, 3)
+        ax.set_title(workname + ": stress = " + str(coords[3]))
+        # ax.set_title(workname)
         for nitem in list(zip(X, Y, Z, namelist)):
             if nitem[3] == nearestname:
                 nearestx = nitem[0]
@@ -2311,8 +2315,8 @@ def MDS_interactive_3d_plot_lined(collation, metric_p, scaled_stress_p, workname
                 nextnearestz = nitem[2]
         # print(nearestx, nearesty, nearestz, nextnearestx, nextnearesty, nextnearestz)
         
-        ax.plot([item[0],nearestx], [item[1], nearesty], [item[2], nearestz], color='black', linestyle='solid', alpha=0.5)
-        ax.plot([item[0],nextnearestx], [item[1], nextnearesty], [item[2], nextnearestz], color='black', linestyle='solid', alpha=0.2)
+        ax.plot([item[0],nearestx], [item[1], nearesty], [item[2], nearestz], color='red', linestyle='solid', alpha=0.5)
+        ax.plot([item[0],nextnearestx], [item[1], nextnearesty], [item[2], nextnearestz], color='orange', linestyle='solid', alpha=0.3)
 
         ax.plot(item[0], item[1], item[2], marker='o')
         ax.text(item[0], item[1], item[2], item[3], color='black')
@@ -2326,3 +2330,172 @@ def remove_witnesses(col, witlist):
         namelist.remove(wit)
     subcol = sub_col_rownums(col, namelist)
     return subcol
+
+# ------------------------------------------------------------------------------
+# INTERACTIVE 3D NEIGHBOUR-JOINER
+# ------------------------------------------------------------------------------
+
+def nj_post_dist_matrix(col):
+    """return a distance matrix including all nodes created by neighbour-joiner, with the distances in the initital topology added to it
+    """
+    # get the initial distance matrix:
+    initial_dist_matrix = full_dist_matrix(col)
+    # get the neighbour_joiner topology:
+    dlist = dist_matrix_to_list(dist_matrix(col))
+    topology = neighbour_joiner(dlist, [], 1)
+    # figure out how many nodes are needed:
+    num_nodes = len(topology) - 1 # because the last item on the topology will also refer to the last node.
+    node_names = [row[0] for row in topology][:-1] # again, because the last name should be identical to the penultimate one.
+    # create the new distance matrix, with empty values for the nodes:
+    new_dm_headline = initial_dist_matrix[0]
+    new_dm = [new_dm_headline + node_names]
+    witness_filler_list = ['fill_me' for item in node_names]
+    for row in initial_dist_matrix[1:]:
+        new_dm.append(row + witness_filler_list)
+    node_filler_list = ['fill_me' for item in initial_dist_matrix[0][1:]]
+    for node in node_names:
+        new_dm.append([node] + node_filler_list + witness_filler_list)
+    for row in topology:
+        newnode = row[0]
+        child1 = row[1][0]
+        child1_distance = row[1][1]
+        child2 = row[2][0]
+        child2_distance = row[2][1]
+        # insert distances between the children and the node into the distance matrix:
+        newnode_index = new_dm[0].index(newnode)
+        child1_index = new_dm[0].index(child1)
+        child2_index = new_dm[0].index(child2)
+        # insert distances between new_node and its children:
+        new_dm[newnode_index][child1_index] = child1_distance
+        new_dm[child1_index][newnode_index] = child1_distance
+        new_dm[newnode_index][child2_index] = child2_distance
+        new_dm[child2_index][newnode_index] = child2_distance
+    return new_dm
+
+
+
+def find_distance(me, otherwit, dmatrix, topology):
+    """for ME, find the distance to OTHERWIT using the DMATRIX (output of NJ_POST_DIST_MATRIX()) and TOPOLOGY (output of NEIGHBOUR_JOINER())"""
+    import statistics
+    me_index = dmatrix[0].index(me)
+    otherwit_index = dmatrix[0].index(otherwit)
+    if dmatrix[me_index][otherwit_index] != 'fill_me':
+        distance = dmatrix[me_index][otherwit_index]
+        # print("  distance for " + otherwit + " is " + str(distance))
+        return distance
+    else:
+        wits_to_mean = []
+        for row in topology:
+            if row[0] == otherwit:
+                wits_to_mean.append(row[1][0])
+                wits_to_mean.append(row[2][0])
+        wits_to_mean = set(wits_to_mean)
+        # print("no distance for " + otherwit + ": need to calculate using " + str(wits_to_mean))
+        distances = []
+        for wit in wits_to_mean:
+            distances.append(find_distance(me, wit, dmatrix, topology))
+            mean_distance = statistics.mean(distances)
+            # print("returning means for " + str(wits_to_mean) + ": " + str(distances) + " = " + str(mean_distance))
+        return mean_distance
+
+# now, for each witness in dmatrix, I want to find the distance to each node, if not already known.
+def nj_complete_dist_matrix(col):
+    """given COL, a collation, return a complete distance matrix including neighbour-joiner nodes"""
+    dmatrix = nj_post_dist_matrix(col)
+    dlist = dist_matrix_to_list(dist_matrix(col))
+    topology = neighbour_joiner(dlist, [], 1)
+    witlist = col[0][1:]
+    nodelist = dmatrix[0][len(witlist) + 1:]
+
+    # I need to add 0's for where it's a distance to itself.
+    for row in dmatrix:
+        name1 = row[0]
+        for item, name2 in zip(row, dmatrix[0]):
+            if name1 == name2:
+                dmatrix[dmatrix[0].index(name1)][dmatrix[0].index(name2)] = 0
+
+    for wit in witlist:
+        wit_index = dmatrix[0].index(wit)
+        for node in nodelist:
+            node_index = dmatrix[0].index(node)
+            dist = find_distance(wit, node, dmatrix, topology)
+            dmatrix[wit_index][node_index] = dist
+            dmatrix[node_index][wit_index] = dist
+
+    for wit in nodelist:
+        wit_index = dmatrix[0].index(wit)
+        for node in nodelist:
+            node_index = dmatrix[0].index(node)
+            dist = find_distance(wit, node, dmatrix, topology)
+            dmatrix[wit_index][node_index] = dist
+            dmatrix[node_index][wit_index] = dist
+
+    return dmatrix
+
+
+def nj_3d(col, metric_p, scaled_stress_p, workname):
+    from sklearn.manifold import MDS
+    import numpy as np
+    mds = MDS(dissimilarity='precomputed', random_state=0, metric=metric_p, n_components=3, normalized_stress=scaled_stress_p)
+
+    dm = nj_complete_dist_matrix(col)
+    final_matrix = np.array(sk_dmatrix(dm))
+    coords = mds.fit_transform(final_matrix)
+    coords
+
+    stress = round(mds.stress_, 3)
+
+    # rotate the data:
+    # this part taken from: https://scikit-learn.org/stable/auto_examples/manifold/plot_mds.html#example-manifold-plot-mds-py
+    from sklearn.decomposition import PCA
+    clf = PCA(n_components=3)
+    coords = clf.fit_transform(coords)
+
+
+    # assign coordinates to x and y lists:
+    x = [cell[0] for cell in coords]
+    y = [cell[1] for cell in coords]
+    z = [cell[2] for cell in coords]
+    # [x, y, z, stress]
+
+    namelist = dm[0][1:]
+
+    import matplotlib
+    matplotlib.rcParams['font.family'] = 'Charis SIL'
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d import axes3d
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.set_title(workname + ": stress = " + str(stress))
+
+    dlist = dist_matrix_to_list(dist_matrix(col))
+    topology = neighbour_joiner(dlist, [], 1)
+    for row in topology:
+        parent = row[0]
+        child1 = row[1][0]
+        child2 = row[2][0]
+        parent_coords = coords[namelist.index(parent)]
+        child1_coords = coords[namelist.index(child1)]
+        child2_coords = coords[namelist.index(child2)]
+        ax.plot([parent_coords[0], child1_coords[0]], [parent_coords[1], child1_coords[1]], [parent_coords[2], child1_coords[2]], color='black', linestyle='solid', alpha=0.5)
+        ax.plot([parent_coords[0], child2_coords[0]], [parent_coords[1], child2_coords[1]], [parent_coords[2], child2_coords[2]], color='black', linestyle='solid', alpha=0.5)
+
+    witnesses = col[0][1:]
+    firstnode = len(witnesses) + 1
+    nodes = dm[0][firstnode:]
+    # print(witnesses, nodes)
+    
+    for item in list(zip(x, y, z, namelist)):
+        if item[3] in witnesses:
+            ax.plot(item[0], item[1], item[2], marker='o')
+        else:
+            ax.plot(item[0], item[1], item[2], color='gray')
+        ax.text(item[0], item[1], item[2], item[3], color='black')
+    
+    return plt.show(block=False)
+
+def median_witness(col):
+    """return a sorted list from median witness to most outlying witness, with distances"""
+    all_dists = nj_complete_dist_matrix(col)
+    sum_dists = [[row[0], sum(row[1:])] for row in all_dists[1:]]
+    return sorted(sum_dists, key=lambda x: x[1])
