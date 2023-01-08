@@ -2264,7 +2264,7 @@ def two_nearest(names, dists):
     return [smallest, next_smallest]
 
 
-def MDS_interactive_3d_plot_lined(collation, metric_p, scaled_stress_p, workname):
+def MDS_interactive_3d_plot_lined(collation, metric_p, scaled_stress_p, workname, caption_postscript, e, a, r, filename):
     # parts adapted from https://matplotlib.org/stable/gallery/mplot3d/surface3d.html
     # another part adapted from: https://scikit-learn.org/stable/auto_examples/manifold/plot_mds.html#example-manifold-plot-mds-py
 
@@ -2279,6 +2279,7 @@ def MDS_interactive_3d_plot_lined(collation, metric_p, scaled_stress_p, workname
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import axes3d
     matplotlib.rcParams['font.family'] = 'Charis SIL'
+    matplotlib.rcParams["figure.figsize"] = (8, 8)
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -2300,9 +2301,8 @@ def MDS_interactive_3d_plot_lined(collation, metric_p, scaled_stress_p, workname
         nearestname=twonearest[0][0]
         nextnearestname=twonearest[1][0]
         # print(itemname, ": ", nearestname, nextnearestname)
-
+        
         # stress = round(mds.stress_, 3)
-        ax.set_title(workname + ": stress = " + str(coords[3]))
         # ax.set_title(workname)
         for nitem in list(zip(X, Y, Z, namelist)):
             if nitem[3] == nearestname:
@@ -2315,13 +2315,44 @@ def MDS_interactive_3d_plot_lined(collation, metric_p, scaled_stress_p, workname
                 nextnearestz = nitem[2]
         # print(nearestx, nearesty, nearestz, nextnearestx, nextnearesty, nextnearestz)
         
-        ax.plot([item[0],nearestx], [item[1], nearesty], [item[2], nearestz], color='red', linestyle='solid', alpha=0.5)
-        ax.plot([item[0],nextnearestx], [item[1], nextnearesty], [item[2], nextnearestz], color='orange', linestyle='solid', alpha=0.3)
+        ax.plot([item[0],nearestx], [item[1], nearesty], [item[2], nearestz], color='red', linestyle='solid', alpha=1, linewidth=1)
+        ax.plot([item[0],nextnearestx], [item[1], nextnearesty], [item[2], nextnearestz], color='orange', linestyle='dashed', alpha=1, linewidth=1)
 
         ax.plot(item[0], item[1], item[2], marker='o')
         ax.text(item[0], item[1], item[2], item[3], color='black')
+
+    ax.set_xlabel('Component 1')
+    ax.set_ylabel('Component 2')
+    ax.set_zlabel('Component 3')
+
+    # caption generation
+    if metric_p == True:
+        metric_or_nonmetric = "Metric "
+    else:
+        metric_or_nonmetric = "Nonmetric "
+
+    if scaled_stress_p == True:
+        normstressornot = "Normalized"
+    else:
+        normstressornot = "Raw"
+    caption = metric_or_nonmetric + "MDS plot for " + workname + ".  3 components. " + normstressornot + " stress = " + str(coords[3]) + ". " + caption_postscript
+    interactive_caption = metric_or_nonmetric + "MDS plot for " + workname + ".  3 components. " + normstressornot + " stress = " + str(coords[3]) + ". " + caption_postscript
+
+    
+    import matplotlib.lines as mlines
+    red_line = mlines.Line2D([], [], color='red', label='links nearest witness', linewidth=1)
+    orange_line = mlines.Line2D([], [], color='orange', label='links second-nearest witness', linewidth=1, linestyle="dashed")
+    ax.legend(handles=[red_line, orange_line])
+
+    ax.view_init(elev=e, azim=a, roll=r)
+
+    # now save the figure to the filename:
+    plt.savefig(filename, format='pdf', pad_inches = 0.5, bbox_inches='tight')
+    
+    # having saved the figure, now set the title for the interactive version:
+    ax.set_title(interactive_caption)
     plt.show(block=False)
-    return 
+    return '#+caption: ' + caption + '\n' + '#+name: ' + filename.rsplit('.', maxsplit=1)[0] + '\n#+attr_latex: :placement [t] :width \\textwidth' + '\n' + 'file:' + filename
 
 def remove_witnesses(col, witlist):
     """Return collation COL shorn of all witnesses in WITLIST"""
@@ -2433,7 +2464,7 @@ def nj_complete_dist_matrix(col):
     return dmatrix
 
 
-def nj_3d(col, metric_p, scaled_stress_p, workname):
+def nj_3d(col, metric_p, scaled_stress_p, workname, caption_postscript, e, a, r, filename):
     from sklearn.manifold import MDS
     import numpy as np
     mds = MDS(dissimilarity='precomputed', random_state=0, metric=metric_p, n_components=3, normalized_stress=scaled_stress_p)
@@ -2444,6 +2475,7 @@ def nj_3d(col, metric_p, scaled_stress_p, workname):
     coords
 
     stress = round(mds.stress_, 3)
+    # print(stress)
 
     # rotate the data:
     # this part taken from: https://scikit-learn.org/stable/auto_examples/manifold/plot_mds.html#example-manifold-plot-mds-py
@@ -2462,11 +2494,30 @@ def nj_3d(col, metric_p, scaled_stress_p, workname):
 
     import matplotlib
     matplotlib.rcParams['font.family'] = 'Charis SIL'
+    matplotlib.rcParams["figure.figsize"] = (8, 8)
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import axes3d
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    ax.set_title(workname + ": stress = " + str(stress))
+    # ax.set_title(workname + ": stress = " + str(stress))
+    ax.set_xlabel('Component 1')
+    ax.set_ylabel('Component 2')
+    ax.set_zlabel('Component 3')
+
+    # caption generation
+    if metric_p == True:
+        metric_or_nonmetric = "Metric "
+    else:
+        metric_or_nonmetric = "Nonmetric "
+
+    if scaled_stress_p == True:
+        normstressornot = "Normalized"
+    else:
+        normstressornot = "Raw"
+    caption = metric_or_nonmetric + "MDS Neighbour-joiner chain for " + workname + ".  3 components. " + normstressornot + " stress = " + str(stress) + ". " + caption_postscript
+    interactive_caption = metric_or_nonmetric + "MDS Neighbour-joiner chain for " + workname + ".  3 components. " + normstressornot + " stress = " + str(stress) + ". " + caption_postscript
+    
+
 
     dlist = dist_matrix_to_list(dist_matrix(col))
     topology = neighbour_joiner(dlist, [], 1)
@@ -2477,8 +2528,8 @@ def nj_3d(col, metric_p, scaled_stress_p, workname):
         parent_coords = coords[namelist.index(parent)]
         child1_coords = coords[namelist.index(child1)]
         child2_coords = coords[namelist.index(child2)]
-        ax.plot([parent_coords[0], child1_coords[0]], [parent_coords[1], child1_coords[1]], [parent_coords[2], child1_coords[2]], color='black', linestyle='solid', alpha=0.5)
-        ax.plot([parent_coords[0], child2_coords[0]], [parent_coords[1], child2_coords[1]], [parent_coords[2], child2_coords[2]], color='black', linestyle='solid', alpha=0.5)
+        ax.plot([parent_coords[0], child1_coords[0]], [parent_coords[1], child1_coords[1]], [parent_coords[2], child1_coords[2]], color='black', linestyle='solid', alpha=0.5, linewidth=1)
+        ax.plot([parent_coords[0], child2_coords[0]], [parent_coords[1], child2_coords[1]], [parent_coords[2], child2_coords[2]], color='black', linestyle='solid', alpha=0.5, linewidth=1)
 
     witnesses = col[0][1:]
     firstnode = len(witnesses) + 1
@@ -2491,11 +2542,31 @@ def nj_3d(col, metric_p, scaled_stress_p, workname):
         else:
             ax.plot(item[0], item[1], item[2], color='gray')
         ax.text(item[0], item[1], item[2], item[3], color='black')
-    
-    return plt.show(block=False)
 
-def median_witness(col):
+    import matplotlib.lines as mlines
+    gray_line = mlines.Line2D([], [], color='gray', label='edges', linewidth=1)
+    black_line = mlines.Line2D([], [], color='black', label='final edge', linewidth=1)
+    ax.legend(handles=[gray_line, black_line])
+
+        
+    ax.view_init(elev=e, azim=a, roll=r)
+
+    # now save the figure to the filename:
+    # plt.tight_layout(pad=1) # get a tight layout
+    plt.savefig(filename, format='pdf', pad_inches = 0.5, bbox_inches='tight')
+
+    # having saved the figure, now set the title for the interactive version:
+    ax.set_title(interactive_caption)    
+
+    plt.show(block=False)
+
+    return '#+caption: ' + caption + '\n' + '#+name: ' + filename.rsplit('.', maxsplit=1)[0] + '\n#+attr_latex: :placement [t] :width \\textwidth' + '\n' + 'file:' + filename
+
+def median_witness(col, nj_p):
     """return a sorted list from median witness to most outlying witness, with distances"""
-    all_dists = nj_complete_dist_matrix(col)
+    if nj_p == True:
+        all_dists = nj_complete_dist_matrix(col)
+    else:
+        all_dists = full_dist_matrix(col)
     sum_dists = [[row[0], sum(row[1:])] for row in all_dists[1:]]
     return sorted(sum_dists, key=lambda x: x[1])
