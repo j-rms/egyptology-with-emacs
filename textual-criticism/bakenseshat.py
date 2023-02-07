@@ -1856,7 +1856,7 @@ def strip_unweighted(weighted_collation):
 
 def t2_weighting_by_quartets_stripped_unweighted(collation, witlist):
     """return a quartet-weighted collation for witness list <witlist> with all rows removed where no weighting has been applied"""
-    weighted_col = t2_weighting_by_quartets(sub_col_rownums(collation, witlist), witlist)
+    weighted_col = t2_weighting_by_quartets(sub_col(collation, [0] + witlist), witlist)
     stripped_col = strip_unweighted(weighted_col)
     return stripped_col
 
@@ -2257,7 +2257,7 @@ def MDS_interactive_3d_plot(collation, metric_p, scaled_stress_p):
 def two_nearest(names, dists):
     """given NAMES, an ordered list of names, and DISTS, a similarly ordered list of distances, return the names and distances corresponding to the smallest and next-smallest distances"""
     nd = list(zip(names, dists))
-    new_nd = [pair for pair in nd if pair[1] != 0]
+    new_nd = [pair for pair in nd if str(pair[1]) != "0"] # Must distinguish between 0 and 0.0 in order to pick up stemmatically inseparable witnesses.
     new_nd.sort(key=lambda x: x[1]) # sort from smallest to largest distance
     smallest = new_nd[0] # nd[0] will be the witness itself, with a distance of 0.
     next_smallest = new_nd[1]
@@ -2296,7 +2296,7 @@ def MDS_interactive_3d_plot_lined(collation, metric_p, scaled_stress_p, workname
         itemname=item[3]
 
         twonearest=two_nearest(namelist, item[4][1:])
-        # print(twonearest)
+        print(twonearest)
         
         nearestname=twonearest[0][0]
         nextnearestname=twonearest[1][0]
@@ -2345,7 +2345,8 @@ def MDS_interactive_3d_plot_lined(collation, metric_p, scaled_stress_p, workname
     ax.legend(handles=[red_line, orange_line])
 
     ax.view_init(elev=e, azim=a, roll=r)
-
+    plt.gca().set_aspect('equal', adjustable='box')
+    
     # now save the figure to the filename:
     plt.savefig(filename, format='pdf', pad_inches = 0.5, bbox_inches='tight')
     
@@ -2550,6 +2551,7 @@ def nj_3d(col, metric_p, scaled_stress_p, workname, caption_postscript, e, a, r,
 
         
     ax.view_init(elev=e, azim=a, roll=r)
+    plt.gca().set_aspect('equal', adjustable='box')
 
     # now save the figure to the filename:
     # plt.tight_layout(pad=1) # get a tight layout
