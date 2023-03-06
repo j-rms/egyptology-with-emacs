@@ -2279,7 +2279,7 @@ def MDS_interactive_3d_plot_lined(collation, metric_p, scaled_stress_p, workname
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import axes3d
     matplotlib.rcParams['font.family'] = 'Charis SIL'
-    matplotlib.rcParams["figure.figsize"] = (8, 8)
+    matplotlib.rcParams["figure.figsize"] = (12, 12)
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -2495,7 +2495,7 @@ def nj_3d(col, metric_p, scaled_stress_p, workname, caption_postscript, e, a, r,
 
     import matplotlib
     matplotlib.rcParams['font.family'] = 'Charis SIL'
-    matplotlib.rcParams["figure.figsize"] = (8, 8)
+    matplotlib.rcParams["figure.figsize"] = (12, 12)
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d import axes3d
     fig = plt.figure()
@@ -2572,3 +2572,31 @@ def median_witness(col, nj_p):
         all_dists = full_dist_matrix(col)
     sum_dists = [[row[0], sum(row[1:])] for row in all_dists[1:]]
     return sorted(sum_dists, key=lambda x: x[1])
+
+# ------------------------------------------------------------------------------
+# RETURN A NICELY FORMATTED TEXT STRING OF A WITNESS'S TEXT
+# ------------------------------------------------------------------------------
+
+def find_wit_text(col, witname):
+    """return WITNAME's text from COL"""
+    rotated_col = rotate_collation(col)
+    for row in rotated_col:
+        if row[0] == witname:
+            return row
+
+def clean_wit_text(found_wit_text):
+    """convert found_wit_text into a readable string"""
+    stopwords = ['‑‑', '‑']
+    new_wit_text = [word for word in found_wit_text if word not in stopwords and '‑‑' not in word]
+    text_string = ""
+    for word in new_wit_text:
+        if word[0] != "꞊" and word[0] != ".":
+            text_string = text_string + (" ")
+            text_string = text_string + word
+        else:
+            text_string = text_string + word
+            
+    return text_string
+
+def get_wit_text(col, witname):
+    return clean_wit_text(find_wit_text(col, witname))
