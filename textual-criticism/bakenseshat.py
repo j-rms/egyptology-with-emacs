@@ -2598,5 +2598,5 @@ def clean_wit_text(found_wit_text):
             
     return text_string
 
-def get_wit_text(col, witname):
+def get_whole_wit_text(col, witname):
     return clean_wit_text(find_wit_text(col, witname))
