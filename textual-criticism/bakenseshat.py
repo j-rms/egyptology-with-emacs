@@ -2600,3 +2600,16 @@ def clean_wit_text(found_wit_text):
 
 def get_whole_wit_text(col, witname):
     return clean_wit_text(find_wit_text(col, witname))
+
+# ------------------------------------------------------------------------------
+# RETURN A COLLATION WITH BOTH TBT and LINE NUMBER REFERENCES
+# ------------------------------------------------------------------------------
+def tbtnum_col(col):
+    """add a column of line numbers to the original collation and return the result."""
+    col_o = col
+    col_f = fill_collation(col, 1)
+    newcol = [[0] + col_f[0]]
+    for row_o, row_f in zip(col_o, col_f):
+        newrow = [row_o[0]] + row_f
+        newcol.append(newrow)
+    return newcol
