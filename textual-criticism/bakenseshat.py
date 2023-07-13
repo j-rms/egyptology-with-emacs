@@ -2605,11 +2605,16 @@ def get_whole_wit_text(col, witname):
 # RETURN A COLLATION WITH BOTH TBT and LINE NUMBER REFERENCES
 # ------------------------------------------------------------------------------
 def tbtnum_col(col):
-    """add a column of line numbers to the original collation and return the result."""
+    """add line numbers to all empty cells in the original collation's first column, and return the result."""
     col_o = col
     col_f = fill_collation(col, 1)
-    newcol = [[0] + col_f[0]]
+    newcol = []
     for row_o, row_f in zip(col_o, col_f):
-        newrow = [row_o[0]] + row_f
+        if row_o[0] == "":
+            newrow = row_f
+        else:
+            print(row_o[0])
+            tbtref = "*" + str(row_o[0]) + "*"
+            newrow = [tbtref] + row_o[1:]
         newcol.append(newrow)
     return newcol
