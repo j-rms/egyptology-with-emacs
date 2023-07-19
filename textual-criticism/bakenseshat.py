@@ -2618,3 +2618,57 @@ def tbtnum_col(col):
             newrow = [tbtref] + row_o[1:]
         newcol.append(newrow)
     return newcol
+
+# ------------------------------------------------------------------------------
+# COMPARISON TABLE FUNCTIONS
+# ------------------------------------------------------------------------------
+
+def make_comparison_table(witness, other_witnesses, rows, collation):
+    wits = [witness] + other_witnesses
+    subcoll = sub_col_rownums(collation, wits)
+    subcolll = [[0] + wits] + [row for row in subcoll if subcoll.index(row) in rows]
+    # now we need to do the sums at the bottom:
+    sumrow = [0] * len(subcolll[0])
+    for row in subcolll[1:]:
+        mainwitreading = row[1]
+        for n in range(len(row)):
+            if row[n] == mainwitreading:
+                sumrow[n] = sumrow[n] + 1
+    return subcolll + [sumrow]
+
+def make_remnant_table(comptable, wit_to_remove):
+    remwit_index = comptable[0].index(wit_to_remove)
+    # removing each row where the main witness's reading (row[1]) matches the witness to remove's reading:
+    remrows_table = []
+    for row in comptable:
+        if row[1] != row[remwit_index]:
+            remrows_table.append(row)
+    # removing the indicated witness:
+    table_minus_wit_to_remove = []
+    for row in remrows_table:
+        newrow = []
+        for n in range(len(row)):
+            if n != remwit_index:
+                newrow.append(row[n])
+        table_minus_wit_to_remove.append(newrow)
+    remnant_table = table_minus_wit_to_remove[:-1]
+    # resumming the rows:
+    sumrow = [0] * len(remnant_table[0])
+    for row in remnant_table[1:]:
+        mainwitreading = row[1]
+        for n in range(len(row)):
+            if row[n] == mainwitreading:
+                sumrow[n] = sumrow[n] + 1    
+    return remnant_table + [sumrow]
+
+def recalc_comparison_table(comptable):
+    recalcd_table = comptable[:-1]
+    sumrow = [0] * len(recalcd_table[0])
+    for row in recalcd_table[1:]:
+        mainwitreading = row[1]
+        for n in range(len(row)):
+            if row[n] == mainwitreading:
+                sumrow[n] = sumrow[n] + 1    
+    return recalcd_table + [sumrow]
+    
+
