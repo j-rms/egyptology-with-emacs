@@ -2071,6 +2071,15 @@ def compare_diffs(col, main_witness, others_witlist):
         row.append(goeslikes)
     return set_varplaces
 
+def dists_to_others(wit, col):
+    """return a list of hamming distances between WIT and all other witnesses in COL, from nearest to furthest."""
+    dm = full_dist_matrix(col)
+    wit_index = dm[0].index(wit)
+    dists = [[row[0], row[wit_index]] for row in dm[1:]]
+    sorted_dists = sorted(dists, key=lambda x: x[1])
+    return sorted_dists
+
+
 
 # ------------------------------------------------------------------------------
 # MDS FUNCTIONS
