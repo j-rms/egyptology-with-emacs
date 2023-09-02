@@ -2680,4 +2680,82 @@ def recalc_comparison_table(comptable):
                 sumrow[n] = sumrow[n] + 1    
     return recalcd_table + [sumrow]
     
+# ------------------------------------------------------------------------------
+# MALFORMED CHECKS
+# ------------------------------------------------------------------------------
 
+def check_i_s(col):
+    rownum=1
+    malformed_i_list = []
+    witlist = col[0]
+    for row in col[1:]:
+        cellnum=0
+        for cell in row:
+            witname = witlist[cellnum]
+            cell_string = str(cell)
+            num_i_s = len([i for i, ltr in enumerate(cell_string) if ltr == 'i'])
+            num_proper_i_s = len([i for i, ltr in enumerate(cell_string) if ltr == '̓']) # this contains the accent for i̓: it's not empty!
+            # print(str(num_i_s) + " " + str(num_proper_i_s))
+            if num_i_s != num_proper_i_s:
+                malformed_i_list.append([rownum, witname, cell_string, "contains i not i̓"])
+            cellnum = cellnum + 1
+        rownum = rownum + 1
+    return malformed_i_list
+
+def check_equals(col):
+    """checks to see if any cells in col contain = rather than ꞊"""
+    rownum = 1
+    malformed_equals_list = []
+    witlist = col[0]
+    for row in col[1:]:
+        cellnum = 0
+        for cell in row:
+            witname = witlist[cellnum]
+            if "=" in str(cell):
+                malformed_equals_list.append([rownum, witname, str(cell), "contains = not ꞊"])
+            cellnum = cellnum + 1
+        rownum = rownum + 1
+    return malformed_equals_list
+
+def check_dashes(col):
+    """checks to see if any cells in col contain - rather than ‑"""
+    rownum = 1
+    malformed_dash_list = []
+    witlist = col[0]
+    for row in col[1:]:
+        cellnum = 0
+        for cell in row:
+            witname = witlist[cellnum]
+            if "-" in str(cell):
+                malformed_dash_list.append([rownum, witname, str(cell), "contains - not ‑"])
+            cellnum = cellnum + 1
+        rownum = rownum + 1
+    return malformed_dash_list
+
+def check_empties(col):
+    """checks to see if any cells in col contain no text at all"""
+    rownum = 1
+    empties_list = []
+    witlist = col[0]
+    for row in col[1:]:
+        cellnum = 0
+        for cell in row:
+            witname = witlist[cellnum]
+            if str(cell) == "":
+                empties_list.append([rownum, witname, str(cell), "cell is empty"])
+            cellnum = cellnum + 1
+        rownum = rownum + 1
+    return empties_list
+
+def run_malformed_checks(col):
+    """runs a list of checks to establish whether the collation is malformed, and returns results as a table"""
+    results = []
+    results.extend(check_equals(col))
+    results.extend(check_i_s(col))
+    results.extend(check_dashes(col))
+    results.extend(check_empties(col))
+    sorted_results = sorted(results, key=lambda x: x[0])
+    fulltable = [["row", "witness", "cell", "error"], None]
+    fulltable.extend(sorted_results)
+    return fulltable
+    
