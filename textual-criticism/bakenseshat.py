@@ -2610,6 +2610,41 @@ def clean_wit_text(found_wit_text):
 def get_whole_wit_text(col, witname):
     return clean_wit_text(find_wit_text(col, witname))
 
+def collapse_lacunae(word_list):
+    collapsed_lacunae = []
+    for word_index in range(len(word_list)):
+        this_word = word_list[word_index]
+        print(this_word)
+        if word_index != len(word_list) - 1:
+            next_word = word_list[word_index + 1]
+            if this_word != "[...]":
+                collapsed_lacunae.append(this_word)
+            elif this_word == "[...]" and next_word != "[...]":
+                collapsed_lacunae.append(this_word)
+        else:
+            collapsed_lacunae.append(this_word)
+    return collapsed_lacunae
+
+def remove_omissions(word_list):
+    return [word for word in word_list if "‑‑" not in word and word != "‑"]
+
+def get_clean_transliteration(word_list):
+    text = remove_omissions(word_list)
+    collapsed_text = collapse_lacunae(text)
+    betweens = []
+    for word in collapsed_text:
+        if word[0] not in ["꞊", ".", "‑"]:
+            betweens.append(" ")
+        else:
+            betweens.append("")
+    full_text = []
+    for pair in zip(betweens, collapsed_text):
+        full_text.append(pair[0]) 
+        full_text.append(pair[1])
+    # joined_text = " ".join(collapsed_text)
+    joined_text = "".join(full_text[1:])
+    return joined_text
+
 # ------------------------------------------------------------------------------
 # RETURN A COLLATION WITH BOTH TBT and LINE NUMBER REFERENCES
 # ------------------------------------------------------------------------------
@@ -2759,3 +2794,36 @@ def run_malformed_checks(col):
     fulltable.extend(sorted_results)
     return fulltable
     
+# ------------------------------------------------------------------------------
+# FINDING SPECIFIC READINGS (for normalization)
+# ------------------------------------------------------------------------------
+
+import collections
+def list_specific_readings(col):
+    """returns a table of the specific readings in COL"""
+    witnames = col[0]
+    rownum = 1
+    specific_readings = [["row", "witness", "specific reading", "other readings"], None]
+    for row in col[1:]:
+        cellnum = 1
+        row_readings = row[1:]
+        # get the set of variants attested in row_readings:
+        variants = set(row_readings)
+        # print(variants)
+        # find out how many times each variant is attested:
+        variant_counts = collections.Counter(row_readings)
+        print(variant_counts)
+        for item in variant_counts:
+            if variant_counts[item] == 1 and item != "‑" and item != "[...]":
+                # print(item)
+                item_index = row_readings.index(item) + 1
+                witname = witnames[item_index]
+                # print(str(rownum), ": ", str(item), " ", str(item_index), " ", witname)
+                other_variants = [variant for variant in variants if variant != item and variant != "‑" and variant != "[...]"]
+                other_variant_string = ""
+                for variant in other_variants:
+                    other_variant_string = other_variant_string + str(variant) + "   "
+                specific_readings.append([rownum, witname, item, other_variant_string])
+        rownum = rownum + 1
+    return specific_readings
+
