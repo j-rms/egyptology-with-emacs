@@ -3,6 +3,7 @@
 # ------------------------------------------------------------------------------
 
 import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot
 import numpy
 import statistics
@@ -1491,7 +1492,7 @@ def histogram(data, x_label, y_label, font, filename):
     matplotlib.pyplot.style.use('fast')
     matplotlib.rcParams['font.family'] = [font]
     matplotlib.rcParams.update({'font.size': 10})
-    matplotlib.pyplot.grid(b=True, which='both', axis='both', linewidth=.5)
+    matplotlib.pyplot.grid(which='both', axis='both', linewidth=.5)
     matplotlib.pyplot.hist(data, bins=binsize, linewidth=.5)
     matplotlib.pyplot.xlabel(x_label)
     matplotlib.pyplot.ylabel(y_label)
@@ -1534,7 +1535,7 @@ def three_histograms(data1, data2, data3, x_label, y_label, font, filename, data
     matplotlib.pyplot.style.use('fast')
     matplotlib.rcParams['font.family'] = [font]
     matplotlib.rcParams.update({'font.size': 10})
-    matplotlib.pyplot.grid(b=True, which='both', axis='both', linewidth=.5)
+    matplotlib.pyplot.grid(which='both', axis='both', linewidth=.5)
     # matplotlib.pyplot.hist([data1, data2, data3], bins=binsize3, label=[data1_label, data2_label, data3_label])
     #matplotlib.pyplot.hist(data1, bins=binsize1, alpha=1, label=data1_label, edgecolor='blue', linewidth=.5, hatch='OO')
     #matplotlib.pyplot.hist(data2, bins=binsize2, alpha=0.5, label=data2_label, edgecolor='orange', linewidth=.5, hatch='oo')
@@ -1617,7 +1618,7 @@ def scatter_2_cols(col1, col2, label1, label2, font, filename):
     matplotlib.pyplot.style.use('fast')
     matplotlib.rcParams['font.family'] = [font]
     matplotlib.rcParams.update({'font.size': 10})
-    matplotlib.pyplot.grid(b=True, which='both', axis='both', linewidth=.5)
+    matplotlib.pyplot.grid(which='both', axis='both', linewidth=.5)
     matplotlib.pyplot.scatter(units1, hammings1, s=2, label=label1)
     matplotlib.pyplot.scatter(units2, hammings2, s=.5, label=label2)
     matplotlib.pyplot.xlabel('№ differing variation places used to calculate Hamming distances')
@@ -1642,7 +1643,7 @@ def scatter_3_cols(col1, col2, col3, label1, label2, label3, font, filename, cap
     matplotlib.pyplot.style.use('fast')
     matplotlib.rcParams['font.family'] = [font]
     matplotlib.rcParams.update({'font.size': 10})
-    matplotlib.pyplot.grid(b=True, which='both', axis='both', linewidth=.5)
+    matplotlib.pyplot.grid(which='both', axis='both', linewidth=.5)
     if plot_lines_p == True:
         max_units = max(units1 + units2 + units3)
         lines_x = list(zip(units1, units2, units3))
@@ -1680,7 +1681,7 @@ def scatter_3_cols_mean_vp(col1, col2, col3, label1, label2, label3, font, filen
     matplotlib.pyplot.style.use('fast')
     matplotlib.rcParams['font.family'] = [font]
     matplotlib.rcParams.update({'font.size': 10})
-    matplotlib.pyplot.grid(b=True, which='both', axis='both', linewidth=.5)
+    matplotlib.pyplot.grid(which='both', axis='both', linewidth=.5)
     if plot_lines_p == True:
         max_units = max(mean_units)
         lines_x = mean_units
@@ -1721,7 +1722,7 @@ def scatter_3_cols_scaled(col1, col2, col3, label1, label2, label3, font, filena
     matplotlib.pyplot.style.use('fast')
     matplotlib.rcParams['font.family'] = [font]
     matplotlib.rcParams.update({'font.size': 10})
-    matplotlib.pyplot.grid(b=True, which='both', axis='both', linewidth=.5)
+    matplotlib.pyplot.grid(which='both', axis='both', linewidth=.5)
     if plot_lines_p == True:
         max_units = max(units1 + units2 + units3)
         lines_x = list(zip(units1, units2, units3))
@@ -1762,7 +1763,7 @@ def lac_chart(collation, font, filename, caption_postscript, width, height, work
     matplotlib.pyplot.style.use('fast')
     matplotlib.rcParams['font.family'] = [font]
     matplotlib.rcParams.update({'font.size': 10})
-    matplotlib.pyplot.grid(b=True, which='both', axis='both', linewidth=.5)
+    matplotlib.pyplot.grid(which='both', axis='both', linewidth=.5)
     matplotlib.pyplot.barh(range(len(unlac_lengths)), unlac_lengths, 0.8, 0, label='extant variation places')
     matplotlib.pyplot.barh(range(len(lac_cells)), lac_cells, 0.8, unlac_lengths, label='lacunose variation places')
     matplotlib.pyplot.yticks(range(len(witnesses)), witnesses, rotation='horizontal')
@@ -1785,7 +1786,7 @@ def two_histograms(data1, data2, x_label, y_label, font, filename, data1_label, 
     matplotlib.pyplot.style.use('fast')
     matplotlib.rcParams['font.family'] = [font]
     matplotlib.rcParams.update({'font.size': 10})
-    matplotlib.pyplot.grid(b=True, which='both', axis='both', linewidth=.5)
+    matplotlib.pyplot.grid(which='both', axis='both', linewidth=.5)
     matplotlib.pyplot.hist([data1, data2], bins=num_bins, alpha=1, label=[data1_label, data2_label])
     matplotlib.pyplot.xlabel(x_label)
     matplotlib.pyplot.ylabel(y_label)
@@ -2088,6 +2089,7 @@ import sklearn
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+matplotlib.use('TkAgg')
 import numpy as np
 
 
@@ -2113,7 +2115,7 @@ def MDS_figgen(x, y, xlabel, ylabel, filename, workname, caption_postscript, col
     matplotlib.rcParams['font.family'] = 'Charis SIL'
     matplotlib.rcParams.update({'font.size' : 10})
     matplotlib.rcParams["figure.figsize"] = (8, 8)
-    matplotlib.pyplot.grid(b=True, which='both', axis='both', linewidth=.5)
+    matplotlib.pyplot.grid(which='both', axis='both', linewidth=.5)
     matplotlib.pyplot.xlabel(xlabel)
     matplotlib.pyplot.ylabel(ylabel)
     plt.plot(x, y, 'o', color='black')
@@ -2121,7 +2123,7 @@ def MDS_figgen(x, y, xlabel, ylabel, filename, workname, caption_postscript, col
 
     for num, name in enumerate(namelist):
         plt.annotate(name, (x[num]+0.004, y[num]+0.004))
-        # plt.show()
+        plt.show(block=False)
     # save the figure:
     plt.savefig(filename, format='pdf')
 
