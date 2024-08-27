@@ -782,8 +782,9 @@ def return_winners(witness_list, collation):
 
     score_table = list_t2_groupings(witness_list, collation)[:2] # we are only interested in the top two scores
     # print(score_table) # for debug
-    if score_table[0][0] == score_table[1][0]:
-        return [] # if the two scores are equal, return an empty list.
+# UNCOMMENT THE TWO LINES BELOW TO RETURN TO THE PREVIOUS VERSION OF THIS.
+    # if score_table[0][0] == score_table[1][0]:
+    #     return [] # if the two scores are equal, return an empty list.
 
     variant_table = (type_2_locs(sub_col(collation, witness_list)))
     group1 = score_table[0][1]
