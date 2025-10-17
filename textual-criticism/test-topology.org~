@@ -1,0 +1,843 @@
+**** Topology inferred
+#+begin_src dot :file plots/test-top.pdf :cmdline -Kneato -Tpdf -Nfontname="Charis SIL" -Gfontname="Charis SIL" -Efontname="Charis SIL"  -Nshape=oval
+graph G {
+mode=hier      
+overlap=prism
+overlap_scaling=auto
+splines = true
+ratio=auto
+
+
+A [label="A.
+(57) 8. Z1 / 2. A2
+(69) 8. ‑ / 2. N5
+(100) 8. N33pl. / 2. ?
+(102) 8. ꞊k / 2. ‑‑
+(103) 8. tw / 2. ‑‑
+(106) 8. N1 / 2. N1 N1
+(131) 8. wn / 2. wnn
+(157) 8. i̓sk / 2. i̓sṯ
+(167) 8. (hrw) / 2. hrw
+(196) 8. ꜣḫ / 2. ‑‑
+(211) 8. ḫtf / 2. ḫtfi̓w
+(212) 8. ? / 13. A14
+" shape=box]
+
+B [label=
+"B.
+(95) 1. ꞊i̓ / 7. ‑‑
+(98) 1. A1 / 7. A50
+" shape=box]
+
+C [label="C.
+(57) 1. Z1 / S10C^a(93) A2 C S10C^b(93)
+(136 on) 1. present / S10C^a(93) absent
+" shape=box]
+
+D [label="D.
+(2) 2. r / B1Bo(93) ‑‑
+(3) 2. Z1/ B1Bo(93) ‑‑
+(4) 2. n/ B1Bo(93) ‑‑
+(5) 2. prt/ B1Bo(93) ‑‑
+(6) 2. D54/ B1Bo(93) ‑‑
+(7) 2. m/ B1Bo(93) ‑‑
+(8) 2. (hrw)/ B1Bo(93) ‑‑
+(9) 2. N5./ B1Bo(93) ‑‑
+(11) 2. Z1/ B1Bo(93) ‑‑
+
+(61) 2. psḏ ‖ wbn / B1Bo(93) psḏ
+(95) 2. ꞊i̓ / B1Bo(93) NN
+(100) 2. ? / B1Bo(93) Z2
+(160) 2. wi̓ / B1Bo(93) NN NP
+(167) 2. (hrw) / B1Bo(93) hrw
+(214) 2. ꞊i̓ / B1Bo(93) ꞊f NP
+" shape=box]
+
+E [label="E.
+(59) 2. ? / 13. Z1
+(61) 2. psḏ ‖ wbn / 13. wbn
+(100) 2. ? / 13. Z1 Z1 Z1 Z1
+(120) 2. i̓ꜣḫw / 13. ꜣḫw
+(209) 2. ꞊i̓ / 13. ꞊f
+" shape=box]
+
+F [label="F.
+(60) 3. A40 / 4. ‑‑ 
+(100) 3. N33pl. / 4. ?
+(206) 3. .n / 4. ‑‑
+" shape=box]
+
+G [label="G.
+(195) 3. n / S10C^b(93) ‑‑
+(207) 3. .tw / S10C^b(93) ‑‑
+" shape=box]
+
+H [label="H.
+(59) 4. ? / B2Bo^b(93) Z1 C B2Bo^a(93)
+(95) 4. ‑‑ /B2Bo^b(93) ꞊i̓ C B2Bo^a(93)
+(100) 4. ? / B2Bo^b(93) Z1 Z1 Z1 Z1 C B2Bo^a(93)
+
+(172) 4. i̓rw / B2Bo^b(93) i̓r(w)
+(178) 4. ‑‑ / B2Bo^b(93) Y2 NS
+(214) 4. ‑‑ / B2Bo^b(93) ꞊i̓ C B2Bo^a(93)
+" shape=box]
+
+I [label="I.
+(125) 9. ‑‑ / S10C^c(93) prt C S10C^a(93)
+(126) 9. ‑‑ / S10C^c(93) D54 C S10C^a(93)
+(127) 9. ‑‑ / S10C^c(93) m C S10C^a(93)
+(128) 9. ‑‑ / S10C^c(93) (hrw) C S10C^a(93)
+(129) 9. ‑‑ / S10C^c(93) N9. C S10C^a(93)
+(131) 9. ‑‑ / S10C^c(93) Z1 C S10C^a(93)
+
+(196) 9. ꜣḫ / S10C^c(93) ‑‑
+(83--124) S10C^c(93) all absent
+(204) S10C^c(93) ends
+" shape=box]
+
+J [label="J.
+(57) 3. A2 / 5. Z1
+(61) 3. wbn / 5. psḏ ‖ wbn (sep. cols)
+(77) 3. psḏ / 5. ‑‑ (sep. cols.)
+(79) 3. N8 / 5. ‑
+(98) 3. A1 / 5. A40
+(99) 3. B1 / 5. ‑‑
+(140) 3. ‑‑ / 5. O1
+(157) 3. i̓sṯ / 5. i̓sk
+(214) 3. ‑‑ / 5. ꞊i̓ 
+" shape=box]
+
+L [label="L.
+5. 1PS prot. / B4C(93) 3PS prot.
+
+(59) 5. ? / B4C(93) Z1 NP
+(66) 5. ‑ / B4C(93) m C 8 !1
+(67) 5. ‑ / B4C(93) m i̓ꜥḥ C 8 !1
+(68) 5. ‑ / B4C(93) N11 C 8 !1
+
+(105) 5. rwt(i̓) / B4C(93) rwti̓
+(160) 5. wi̓ / B4C(93) NN NP
+(173) 5. ‑‑ / B4C(93) Y2/Y1 NS?
+(175) 5. ꞊i̓ / B4C(93) ꞊f
+(209) 2. ꞊i̓ / B4C(93) ꞊f
+(214) 5. ꞊i̓ / B4C(93) ꞊f NP
+" shape=box]
+
+M [label="M.
+(96) 7. m‑m / B1C(93) m
+(100) 7. N33pl. / B1C(93) Z2 NP
+
+(102) 7. ꞊k / B1C(93) ‑‑ C? 2
+(106) 7. N1 / B1C(93) N1 N1 C? 2
+" shape=box]
+
+N [label="N.
+(125) 5. ‑‑ / 7. prt 
+(126) 5. ‑‑ / 7. D54 
+(127) 5. ‑‑ / 7. m 
+(128) 5. ‑‑ / 7. (hrw) 
+(129) 5. ‑‑ / 7. N5. 
+(130) 5. ‑‑ / 7. Z1 
+
+(61) 5. psḏ ‖ wbn / 7. pwsbḏ/+n
+(98) 5. A40 / 7. A50
+(140) 5. ‑‑ / 7. O1
+(207) 5 .tw / 7. ‑‑
+" shape=box]
+
+O [label="O.
+1. 1PS prot. / 8. 3PS prot.
+
+(2) 1. ‑‑ / 8. r 
+(3) 1. ‑‑ / 8. Z1 
+(4) 1. ‑‑ / 8. n 
+
+(61) 1. pwsbḏ/+n / 8. psḏ ‖ wbn
+(66) 1. ‑ / 8. m
+(67) 1. ‑ / 8. i̓ꜥḥ
+(68) 1. ‑ / 8. N11
+(70) 1. ‑ / 8. A40
+(99) 1. ‑‑ / 8. B1
+(116) 1. ‑ / 8. i̓mi̓w
+(120) 1. ‑ / 8. i̓ꜣḫw
+
+(125) 1. prt = (5) 8. prt
+(126) 1. D54 = (6) 8. D54
+(127) 1. m = (7) 8. m 
+(128) (hrw) = (8) 8. (hrw)
+(129) N5. = (9) 8. N5. 
+(130) Z1 = (11) 8. Z1 
+
+(135) 1. sb(ꜣ) / 8. ‑‑
+(136) 1. N14 / 8. (dwꜣ) N14
+
+(153) 1. i̓mi̓/w / 8. ‑
+(154) 1. ꜣḫw / 8. ‑
+(156) 1. A2/A40 / 8. ‑
+(164) 1. .kw / 8. .w
+(171) 1. m / 8. ‑‑
+(172) 1. i̓rw / 8. ‑‑
+(175) 1. ꞊i̓ / 8. ‑‑
+(177) 1. mꜣꜥ / 8. ‑‑
+(195) 1. n / 8. ‑‑
+(200) 1. ꜥnḫ / 8. ‑‑
+(220) 1. m / 8. ‑‑
+(221) 1. ḏꜣḏꜣt / 8. ‑‑
+(222) 1. Aa8 / 8. ‑‑
+(223) 1. A40 / 8. ‑‑
+(224) 1. N33pl./Z2 / 8. ‑‑
+" shape=box]
+
+P [label="P. 
+(59) 8. ? / 10 Z1
+
+(62) 8. N8 / 10. N5
+(68) 8. N11 / 10. N12
+
+(71) 8. ‑‑ / 10. i̓
+(72) 8. ‑‑ / 10. A2
+(73) 8. ‑‑ / 10. wꜥ
+(75) 8. ‑‑ / 10. Z1
+
+(78) 8. ‑ / 10. F37?
+(79) 8. ‑ / 10. N5
+
+(83) 8. ḥnt / 10. i̓(ꜥ)ḥ
+(84) 8. N37 / 10. N12
+(95) 8. ꞊i̓ / 10. NN
+
+(96) 8. m‑m / 10. m
+(105) 8. rwt(i̓) / 10. rwti̓
+
+(107) 8. (wḥꜥ) P4 / 10. wḥꜥ
+(110) 8. ‑‑ / 10. D36
+(113) 8. ḥnꜥ/ḥꜥꜥ / 10. wꜥw
+(133) 8. ‑‑ / 10. D40?
+
+(224: end of CT 93)
+" shape=box]
+
+Q [label="Q.
+(187) 4. ‑‑ / 9. i̓p
+(188) 4. ‑‑ / 9. Y2
+(189) 4. ‑‑ / 9. i̓
+(190) 4. ‑‑ / 9. Z1
+(195) 4. n / 9. ‑‑
+" shape=box]
+
+R [label="R.
+(14) 22. Y2/D36? / c.Imeni(65B) Y2
+
+(66--70) 22. present / c.Imeni(65B) omitted C?
+
+(83) 22. i̓(ꜥ)ḥ / c.Imeni(65B) i̓(ꜥ)ḥ
+(99) 22. B1 / c.Imeni(65B) ‑‑
+(160) 22. wi̓ / c.Imeni(65B) w(i̓)
+(214) 22. ꞊i̓ / c.Imeni(65B) ‑‑
+(276) 22. B1 / c.Imeni(65B) Z1
+(295) 22. A1 / c.Imeni(65B) Z1
+(302) 22. A1 / c.Imeni(65B) Z1
+(307) 22. ꞊i̓ / c.Imeni(65B) ‑‑
+(322) 22. ḥꜥ / c.Imeni(65B) ḥꜥw C? B4C(90)
+(329) 22. i̓mi̓t(w) / c.Imeni(65B) i̓mi̓ti̓
+(337) 22. nḫnw / c.Imeni(65B) nḫḫ
+(338) 22. A17 / c.Imeni(65B) ‑‑ C? T1Be(90)
+(342) 22. m / c.Imeni(65B) i̓m
+(339) 22. ? / c.Imeni(65B) ‑‑
+" shape=box]
+
+V [label="V.
+(99) 13. B1 / B2Bo^a(93) ‑‑
+(116) 13. i̓mi̓w / B2Bo^a(93) i̓mi̓
+(167) 13. hrw / B2Bo^a(93) (hrw) C? B2Bo^b
+(212) 13. A14 / B2Bo^a(93) A13A
+" shape=box]
+
+X [label="X.
+(14) 15. Y2/D36? / p.Tui(65B) Y2
+(79) 15. N5 / p.Tui(65B) N8 SI?
+(84) 15. N12 / p.Tui N12~
+
+(95) 15. ‑‑ / p.Tui(65B) ꞊k C 13
+(96) 15. m / p.Tui(65B) ‑
+(102) 15. ꞊k / p.Tui(65B) ‑‑ C 13
+(113) 15. ꞊k? / p.Tui(65B) ꞊i̓ C? p.Tui(2)
+
+(135) 15. ‑‑ / p.Tui(65B) sbꜣw C 9 sb(ꜣ)
+(170) 15. pn? / p.Tui(65B) ‑‑ C? BD2
+(183) 15. ꞊f / p.Tui(65B) ꞊i̓
+(190) 15. A1 / p.Tui(65B) Z1
+(191) 15. rdi̓ / p.Tui(65B) ‑‑ C 9/13
+(192) 15. .n / p.Tui(65B) ‑‑ C 9/13
+
+(193) 15. ꞊i̓ / p.Tui(65B) ‑‑ C?
+
+(195) 15. ‑‑ / p.Tui(65B) m C? 9 n
+
+(206) 15. ‑‑ / p.Tui(65B) .n C 13
+(211) 15. ḫtf / p.Tui(65B) ḫfti̓w C 13 ḫtfi̓w
+
+(212) 15. N33 / p.Tui(65B) Z6 SI?
+
+(220) 15. m / p.Tui(65B) ‑‑ C 13
+(221) 15. ḏꜣḏꜣt / p.Tui(65B) ‑‑ C 13
+
+(276) 15. B1 / p.Tui(65B) Z1 C? c.Imeni(65B)
+(282) 15. ‑‑ / p.Tui(65B) .n C? T1Be(90)
+(283) 15. ꞊f / p.Tui(65B) (꞊i̓) C? T1Be(90)
+(295) 15. A1 / p.Tui(65B) Z1 SI?
+
+(301) 15. ‑‑ / p.Tui(65B) ꞊i̓ C?
+(302) 15. ‑‑ / p.Tui(65B) A1 C?
+(314) 15. ‑‑ / p.Tui(65B) r C?
+(324) 15. N33pl. / p.Tui(65B) ‑‑ C?
+(331) 15. mnti̓ / p.Tui(65B) mnt(i̓) C?
+(336) 15. ? / p.Tui(65B) ‑‑ C?
+(339) 15. A40 A40 / p.Tui(65B) N33pl. ꞊i̓(A1)
+" shape=box]
+
+Y [label="Y.
+(8) 22. (hrw) / 14. hrw C? p.Nebamun(2)
+(39) 22. ‑‑ / 14. i̓n
+(40) 22. ‑‑ / 14. NN
+
+(71) 22. i̓ / 14. ‑‑
+(72) 22. A2 / 14. ‑‑
+(73) 22. wꜥ / 14. ‑‑
+(75) 22. Z1 / 14. ‑‑
+
+(95) 22. ‑‑ / 14. ꞊k
+(97) 22. ꜥšꜣwt / 14. ꜥšꜣ(w)t?
+(103) 22. tw / 14. twy → ⟨t⟩wy?
+(120) 22. i̓ꜣḫw / 14. ꜣḫw
+(136) 22. (dwꜣ) N14 / 14. (dw) N14
+(137) 22. t / 14. ꜣt
+(189) 22. ꞊i̓ / 14 .kw
+(190) 22. Z1 / 14. A1
+(193) 22. ꞊i̓ / 14. ‑‑
+(197) 22. Z1 / 14. A52
+
+(200) 22. ‑‑ / 14. ꜥnḫ C 9
+
+(212) 22. ‑‑ / 14. N33
+(207) 22. .t(w) / 14. ꞊tw SI
+(208) 22. ‑‑ / 14. n SI
+(211) 22. ḫtf / 14 ḫfti̓w
+(219) 22. ‑‑ / 14. ꞊i̓ SI
+(268) 22. zꜣ / 14. ‑‑ SI
+
+(310) 22. ḏꜣm / 14. nbw
+(336) 22. ‑‑ / 14. I12
+(347) 22. nṯrw / 14. (nṯrw) SI?
+(348) 22. ‑‑‑ / 14. R8 R8 R8 SI?
+(349) 22. Z1 / 14. ‑‑ SI?
+(329) 22. i̓mi̓t(w) / 14. i̓mi̓w
+(339) 22. ? / 14. A40 A40
+" shape=box]
+
+Z [label="Z.
+(14) 14. Y2/D36? / p.Maiherperi(65B) Y2
+(57) 14. Z1 / p.Maiherperi(65B) A2 C? 13? BD 2?
+
+(97) 14. ꜥšꜣ(w)t? / p.Maiherperi(65B) ꜥšꜣ(w)t
+
+(98) 14. ‑‑ / p.Maiherperi(65B) A1 C? 13/BD 2
+(99) 14. ‑‑ / p.Maiherperi(65B) B1 C? 13/BD 2
+
+(103) 14. ⟨t⟩wy / p.Maiherperi(65B) wy? ( or .kwi̓ i̓r?)
+(113) 14. wꜥw / p.Maiherperi(65B) ‑‑
+
+(167) 14. (hrw) / p.Maiherperi(65B) hrw C? 13
+
+(211) 14. ḫfti̓w / p.Maiherperi(65B) ḫfti̓
+(281) 14. mꜣꜣt(i̓) / p.Maiherperi(65B) mꜣt(i̓)
+
+(287) 14. D54 / p.Maiherperi(65B) D36 C?
+(306) 14. Z1 / p.Maiherperi(65B) ‑‑ C?
+(335) 14. N14 / p.Maiherperi(65B) ‑‑ C?
+(337) 14. nḫnw / p.Maiherperi(65B) nḫnwi̓
+" shape=box]
+
+
+AA [label="AA.
+(56) 16. i̓ / 15 ‑‑
+(57) 16. Z1 / 15. ‑‑
+(58) 16. wꜥ / 15. ‑‑
+(59) 16. Z1 / 15. ‑‑
+
+(61) 16. pzd? / 15. wbn C 13 / C? BD 2
+(77) 16. wbn? / 15. pzd C? BD 2
+(62) 16. N5 / 15. N8 C13
+
+(97) 16. ꜥšꜣ(w)t? / 16. ꜥšꜣ
+
+(103) 16. ⟨t⟩wy / 15. ‑‑ C 13
+(116) 16. i̓mi̓w / 15. i̓mi̓ C 13
+
+(292) 16. rd(wi̓) / 15. (rdwi̓)
+(336) 14. I12 / 16. ?
+
+(347) 14. (nṯrw) / 16. nṯrw C?
+" shape=box]
+
+AB [label="AB.
+(14) 15. D36 / p.Neferrenpet(NY2)(65B) Y2 C? c.Imeni
+(79) 15. ‑‑ / p.Neferrenpet(NY2)(65B) F37 C? p.Sobekmose?
+(113) 15. ꞊k? / p.Neferrenpet(NY2)(65B) m SI?
+(197) 15. A52 / p.Neferrenpet(NY2)(65B) A1
+(277) 15. ꞊i̓ / p.Neferrenpet(NY2)(65B) ‑
+(307) 15. ? / p.Neferrenpet(NY2) ‑‑ SI in AC? C? c.Imeni
+(336) 15. ? / p.Neferrenpet(NY2)(65B) A40
+" shape=box]
+
+AC [label="AC.
+(61) 14. pzd / 16. wbn? C? BD 2
+(77) 14. wbn / 16. pzd? C? BD 2
+(99) 14. B1 / 16. ‑‑
+(113) 14. wꜥw / 16. ꞊k?
+(170) 14. pn / 16. ‑‑?
+(193) 14. ‑‑ /  16. ꞊i̓ C? SI?
+(213) 14.  ‑‑ / 16. N33pl.
+(277) 14. ꞊f / 16. ꞊i̓
+(281) 14. mꜣꜣt(i̓) / 16. mꜣꜣ/mꜣ C? T1Be(90)
+(283) 14. .fi̓ / 16. ꞊f
+
+(297) 14. ꜣms / 16. mdw C?
+(298) 14. S44 / 16. S43 C?
+(299) 14. ‑‑ / 16. Z1 C?
+(300) 14. ‑‑ / 16. M3 C?
+
+(301) 14. ꞊i̓ / 16. ‑‑ SI?
+(302) 14. A1 / 16. ‑‑
+(305) 14. ꜥ / 15. ḏrt SI?
+(307) 14. ꞊i̓ / 15. ? 
+(341) 14. m / 15. ‑‑ C? T1Be(90)
+
+(348) 14. R8 R8 R8 / 16. ‑‑ C?
+
+(349) 14. ‑‑ / 16. A40 SI?
+" shape=box]
+
+AD [label="AD.
+(110) 16. D36 / p.Neferrenpet(Br1)(65B) D40
+(113) 16. ꞊k? / p.Neferrenpet(Br1)(65B) ꞊k
+(284) 16. wi̓ / p.Neferrenpet(Br1)(65B) w(i̓)
+(339) 16. A40 A40 / p.Neferrenpet(Br1)(65B) A40 N33pl.
+" shape=box]
+
+AE [label="AE.
+19=CT 90 → 22=BD 65B
+10. 1PS prot. / 19. 3PS prot.
+
+(24--267) 22. present / 19. absent
+
+(283) 10. .fi̓ / 19. .f(i̓)
+(287) 10. D54 / 19. D36
+(291) 10. Z1 / 19. ‑‑
+(295) 10. A1 / 19. ‑
+(299) 10. ‑‑ / 19. Z1
+(300) 10. ‑‑ /19. M3
+(301) 10. ꞊i̓ / 19. ꞊f
+(306) 10. Z1 / 19. ‑‑
+(313) 10. N33pl. / 19. Z2
+(328) 10. N33pl. / 19. ‑‑
+(337) 10. nḫnw / 19. nḫn
+(339) 10. ? / 19. sp 2
+" shape=box]
+
+AF [label="AF.
+(2) 21. r / B4Bo(90) ‑‑
+(3) 21. Z1 / B4Bo(90) ‑‑
+(4) 21. n / B4Bo(90) ‑‑
+(5) 21. prt / B4Bo(90) ‑‑
+(6) 21. D54 / B4Bo(90) ‑‑
+(7) 21. m / B4Bo(90) ‑‑
+(8) 21. (hrw) / B4Bo(90) ‑‑
+(9) 21. N5. / B4Bo(90) ‑‑
+(11) 21. Z1 / B4Bo(90) ‑‑
+(13) 21. sḫm / B4Bo(90) ‑‑
+(15) 21. z A1 Z1 / B4Bo(90) ‑‑
+(16) 21. m / B4Bo(90) ‑‑
+(20) 21. ḫft / B4Bo(90) ‑‑
+(21) 21. A1 / B4Bo(90) ‑‑
+(23) 21. ꞊f? / B4Bo(90) ‑‑
+
+(284) 21. wi̓ / B4Bo(90) w(i̓) NN
+(294) 21. ꞊f / B4Bo(90) NN
+(301) 21. ꞊f / B4Bo(90) NN
+" shape=box]
+
+AG [label="AG.
+(268) 17. z(A47)ꜣꜣ / B1Bo(90) s(Aa17)ꜣ/+ꜣ
+(314--end) 17. present / B1Bo(90) absent
+" shape=box]
+
+AH [label="AH.
+(268) 20. z(A47)ꜣꜣ / 18. zꜣ
+(292) 20. (rdwi̓) / 18. rd(wi̓)
+(297) 20. mdw / 18. ꜣms
+(298) 20. S43 / 18. S44
+(314) 20. i̓ / 18. ‑‑
+(324) 18. N33pl. / 20. Z2
+(335) 20. ‑‑ / 18. N14
+" shape=box]
+
+AI [label="AI.
+21. 3PS prot. / B2Bo^a(90) 1PS prot.
+
+(312) 21. N33 / B2Bo^a(90) ‑‑
+(324) 17. Z2 / B2Bo^a(90) Z1 Z1 Z1 Z1
+" shape=box]
+
+AJ [label="AJ.
+(2) 18. r / B4C(90) ‑‑
+(3) 18. Z1 / B4C(90) ‑‑
+(4) 18. n / B4C(90) ‑‑
+(5) 18. prt / B4C(90) ‑‑
+(6) 18. D54 / B4C(90) ‑‑
+(7) 18. m / B4C(90) ‑‑
+(8) 18. (hrw) / B4C(90) ‑‑
+(9) 18. N5. / B4C(90) ‑‑
+(11) 18. Z1 / B4C(90) ‑‑
+(13) 18. sḫm / B4C(90) ‑‑
+(15) 18. z A1 Z1 / B4C(90) ‑‑
+(16) 18. m / B4C(90) ‑‑
+(20) 18. ḫft / B4C(90) ‑‑
+(21) 18. A1 / B4C(90) ‑‑
+(23) 18. ꞊f? / B4C(90) ‑‑
+
+(284) 18. NN / B4C(90) wsi̓r NN
+(322) 18. ḥꜥ / B4C(90) ḥꜥw
+" shape=box]
+
+AK [label="AK.
+(284) 19. wi̓ / 18. NN
+(331) 19. mnti̓ / 18. mnt(i̓)
+(336) 19. ‑‑ / 18. B1
+" shape=box]
+
+AL [label="AL.
+(15) 19. z A1 Z1 / T1Be(90) NN?
+(16) 19. m / T1Be(90) ‑‑
+(17) 19. ‑‑ / T1Be(90) ẖrt‑nṯr
+(18) 19. ‑‑ / T1Be(90) r
+(19) 19. ‑‑ / T1Be(90) i̓nt
+(20) 19. ḫft / T1Be(90) ḫtf
+(21) 19. A1 / T1Be(90) ‑‑
+(23) 19. ꞊f? / T1Be(90) ‑‑
+(24) 19. ‑‑ / T1Be(90) i̓r
+(25) 19. ‑‑ / T1Be(90) ꞊f
+(26) 19. ‑‑ / T1Be(90) dp Z1
+(27) 19. ‑‑ / T1Be(90) tꜣ Z1 N23
+
+(268) 19. zꜣ? / T1Be(90) s(Aa17)ꜣ/+ꜣ C? B1Bo(90)
+(281) 19. mꜣꜣt(i̓) / T1Be(90) mꜣꜣ/mꜣ
+(282) 19. ‑‑ / T1Be(90) .n
+(283) 19. .f(i̓) / T1Be(90) (꞊i̓)
+(284) 19. wi̓ / T1Be(90) wi̓ i̓t꞊f
+(324) 19. N33pl. / T1Be(90) Z2 C? B1Bo(90)'s source?
+(334--336) 19. present / T1Be(90) absent
+(337) 19. nḥn / T1Be(90) m ḥtp
+(338) 19. A17 / T1Be(90) ‑‑
+(341) 19. m / T1Be(90) ‑‑
+" shape=box]
+
+AM [label="AM.
+(271) 17. .w / 20. ‑‑
+" shape=box]
+
+AN [label="AN.
+(268) 20. z(A47)ꜣꜣ / T1L zꜣꜣ A47
+(301) 20. ꞊f / T1L NN
+(312) 20. N33 / T1L ‑‑
+" shape=box]
+
+AO [label="AO.
+(284) 17. NN / 21. wi̓
+" shape=box]
+
+AP [label="AP.
+10=CT 93 → 22=BD 65B
+10. 3PS prot. / 22. 1PS prot.
+
+(13--23)  10. absent / 22. present
+
+(14) 10. ‑‑ / 22. Y2/D36?
+
+(60) 10. A40 / 22. ‑‑ C 9?
+(61) 10. psḏ ‖ wbn / 22. pzd (sep. cols.)
+(77) 10. ‑‑ / 22. wbn (sep. cols.)
+(78) 10. F37? / 22. ‑‑
+(95) 10. NN / 22. ‑‑
+(98) 10. A1 / 22. ‑‑
+(133) 10. D40? / 22. D36
+
+(164) 10. .w / 22. .kw C 9
+(187) 10. ‑‑ / 22. i̓p C 9
+(188) 10. ‑‑ / 22. Y2 C 9
+(189) 10. ‑‑ / 22. ꞊i̓ C 9
+(190) 10. ‑‑ / 22. Z1 C 9
+(191) 10. ‑‑ / 22. rdi̓ SI?
+(192) 10. ‑‑ / 22. .n SI?
+(193) 10. ‑‑ / 22. ꞊i̓ SI?
+(197) 10. ‑‑ / 22. Z1
+(206) 8. .n / 10. ‑‑ C 9
+(207) 8. ‑‑ / 10. .t(w) C 9
+(211) 8. ‑‑ / 10. ḫtf C 9
+(220) 8. ‑‑ / 10. m C 9
+(221) 8. ‑‑ / 10. ḏꜣḏꜣt C 9
+(222) 8. ‑‑ / 10. Aa8 C 9
+(223) 8. ‑‑ / 10. A40 C 9
+(224) 8. ‑‑ / 10. N33pl. C 9 Z2
+
+(268--end) 22. present / 10. absent
+" shape=box]
+
+AQ [label="AQ.
+10=CT 93 → 28=BD 2
+
+(28) 10. ‑‑ / 28. ꜥnḫ
+(29) 10. ‑‑ / 28. m‑ḫt
+(30) 10. ‑‑ / 28. D54
+(31) 10. ‑‑ / 28. mt
+(32-33) 10. ‑‑ / 23 ‑‑ A14?
+
+(39) 10. ‑‑ / 28. i̓n
+(40) 10. ‑‑ / 28. NN
+(57) 10. Z1 / 28. A2
+(61) 10. psḏ ‖ wbn / 28. wbn (sep. cols.)
+(77) 10. ‑‑ / 28. pzd (sep. cols.)
+(103) 10. tw / 28. twy
+(120) 10. i̓ꜣḫw / 28. (ꜣḫw)
+(133) 10. D40? / D40
+(170) 10. pn / 28. ‑‑
+(171) 10. ‑‑ / 28.  r
+(172) 10. ‑‑ / 28.  i̓rt
+(177) 10. ‑‑ / 28.  mrrt
+(178) 10. ‑‑ / 28.  Y2
+(179) 10. ‑‑ / 28. N33pl.
+(180) 10. ‑‑ / 28.  ꞊f
+(181) 10. ‑‑ / 28.  nbt
+(182) 10. ‑‑ / 28.  dp
+(183) 10. ‑‑ / 28.  Z1
+(184) 10. ‑‑ / 28.  tꜣ
+(185) 10. ‑‑ / 28.  Z1
+(186) 10. ‑‑ / 28.  N23
+(195) 10. ‑‑ / 28.  m‑m
+(200) 10. ‑‑ / 28.  ꜥnḫw
+(201) 10. ‑‑ / 28. A1
+(203) 10. ‑‑ / 28.  N33pl.
+
+(204--end) 10. present / 23. absent
+" shape=box]
+
+AR [label="AR.
+(32-33) 23. ‑‑ A14? / p.Sobekmose(2) Z6
+
+(66-70) 23. present / p.Sobekmose(2) absent
+
+(56) 23. i̓ / p.Sobekmose(2) i̓w
+(57) 23. A2 / p.Sobekmose(2) ‑‑
+(60) 23. A40 / p.Sobekmose(2) G7
+(71) 23. i̓ / p.Sobekmose(2) i̓w
+(72) 23. A2 / p.Sobekmose(2) ‑‑
+
+(98) 23. A1 / p.Sobekmose(2) A1?
+(99) 23. B1 / p.Sobekmose(2) ?
+(100) 23. N33pl. / p.Sobekmose(2) Z3?
+(110) 23. D36 / p.Sobekmose(2) G41
+(113) 23. wꜥw / p.Sobekmose(2) ‑‑
+(136) 23. (dwꜣ) N14 / p.Sobekmose(2) (dw) N14
+(137) 23. t / p.Sobekmose(2) ꜣt
+(140) 23. O1 / p.Sobekmose(2) N5
+(160) 23. NN / p.Sobekmose(2) w(i̓) NN
+(173) 23. ‑‑ / p.Sobekmose(2) Y2/Y1 NS?
+(179) 23. N33pl. / p.Sobekmose(2) Z3
+(201) 23. A1 / p.Sobekmose(2) ‑‑
+(203) 23. N33pl. / p.Sobekmose(2) Z3
+" shape=box]
+
+AS [label="AS.
+(8) 24. (hrw) / p.Nebamun hrw
+(34) 24. ‑‑ / p.Nebamun N33pl.
+
+(56-70) 24. present / p.Nebamun absent
+
+(78) 24. F37 / p.Nebamun ‑‑
+(84) 24. N12 / p.Nebamun N12~
+(106) 24. N1 / p.Nebamun(2) O32
+(110) 24. D36 / p.Nebamun D40
+(113) 24. wꜥw/wi̓/sw? / p.Nebamun(2) sw
+
+(162-170) 24. present / p.Nebamun absent
+
+(177) 24. mrrt / p.Nebamun(2) mrt
+(178) 24. A2 / p.Nebamun(2) A1 B1
+(181) 24. nbt / p.Nebamun(2) ‑‑
+(195) 24. m‑m / p.Nebamun m
+" shape=box]
+
+AT [label="AT.
+(62) 26. N5 / 24. N5/N8?
+(113) 26. wꜥw / 24. wꜥw/wi̓/sw?
+(178) 26. Y2 / 24. A2
+
+(182) 26. dp/ 24. ‑‑
+(183) 26. Z1/ 24. ‑‑
+(184) 26. tꜣ/ 24. ‑‑
+(185) 26. Z1/ 24. ‑‑
+(186) 26. N23/ 24. ‑‑
+" shape=box]
+
+AU [label="AU.
+(57) 24. A26 / p.Nu(2) A2
+(62) 24. N5 / p.Nu(2) N8 C? SI?
+(72) 24. A2 / p.Nu(2) A26 C?
+(78) 24. ‑‑ / p.Nu(2) F37 C?
+(79) 24. N5 / p.Nu(2) N8 C? 9 SI?
+(84) 24. N12 / p.Nu(2) N11
+(103) 24. twy / p.Nu(2) ṯwy
+(110) 24. D36 / p.Nu(2) D37
+(113) 24. wꜥw/wi̓/sw? / p.Nu(2) wi̓
+(133) 24. D40 / p.Nu(2) D37 SI? C?
+(136) 24. (dwꜣ) N14 / p.Nu(2) (dw) N14
+(137) 24. t / p.Nu(2) ꜣt
+(157) 24. i̓sk / p.Nu(2) ist (SI modernization?)
+(179) 24. N33pl. / p.Nu(2) ‑‑
+(181) 24. ‑‑ / p.Nu(2) nbt C?
+(202) 24. B1 / p.Nu(2) ‑‑ C? SI?
+" shape=box]
+
+AV [label="AV.
+(32-33) 23. ‑‑ A14? / 26. ‑‑ N33
+(78) 23. F37 / 26. ‑‑
+(181) 23. nbt / 26. ‑‑
+(202) 23. ‑‑ / 26. B1
+" shape=box]
+
+AW [label="AW.
+(57) 27. A2 / l.Mahu(2) A26
+(60) 27. A40 / l.Mahu(2) ‑‑ C? BD 65B
+(72) 27. A2 / l.Mahu(2) A26 C?
+(116) 27. i̓mi̓w / l.Mahu(2) i̓m
+(133) 27. D40 / l.Mahu(2) D37 SI? C?
+(164) 27. .w / l.Mahu(2) {t(i̓?)} C? SI?
+(177) 27. mrrt / l.Mahu(2) mrwt
+(186) 27. N21 / l.Mahu(2) N23
+(203) 27. N33pl. / l.Mahu(2) N33pl.v
+" shape=box]
+
+AX [label="AX.
+(98) 26. A1 / 27. ‑‑ C? BD 65B
+(99) 26. B1 / 27. ‑‑ C? BD 65B
+(120) 27. (ꜣḫw) / 27. ꜣḫw C BD 65B
+(186) 26. ‑‑ / 27. N21
+" shape=box]
+
+AY [label="AY.
+(8) 27. (hrw) / p.Nebdjefau(2) hr C? p.Neferrenpet(NY2)(65B)
+(10) 27. ‑‑ / p.Nebdjefau(2) w C? p.Neferrenpet(NY2)(65B)
+(33) 27. N33 / p.Nebdjefau(2) ‑‑ SI?
+(73) 27. wꜥ / p.Nebdjefau(2) rꜥ
+(106) 27. N1 / p.Nebdjefau(2) ‑ SI?
+(110) 27. D36 / p.Nebdjefau(2) D40 C? BD 65B
+(113) 27. wꜥw / p.Nebdjefau(2) ‑‑ SI? C?
+(116) 27. i̓mi̓w / p.Nebdjefau(2) ‑ SI?
+(135) 26. ‑‑ / p.Nebdjefau(2) sbꜣ[w] C p.Tui(65B) CT 93
+(164) 27. (.w) / p.Nebdjefau(2) .w SI? C? B4C(93)
+" shape=box]
+
+AZ [label="AZ.
+(78) 28. ‑‑ / 23. F37
+(83) 28. i̓(ꜥ)ḥ / 23. i̓ꜥḥ
+" shape=box]
+
+BA [label="BA.
+(5-8) 28. prt m hrw / p.Nakht(2) dwꜣ rꜥ SI
+(28-34) 28. present / p.Nakht(2) absent SI
+(58) 28. wꜥ / p.Nakht(2) (rꜥ) SI
+(59) 28. Z1 / p.Nakht(2) N6 SI
+(60) 28. A40 / p.Nakht(2) ‑‑ SI
+(62) 28. N5 / p.Nakht(2) N8 SI
+(68) 28. N12 / p.Nakht(2) N12~
+(79) 28. N5 / p.Nakht(2) N8 SI
+(84) 28. N12 / p.Nakht(2) N12~
+(95) 28. NN / p.Nakht(2) ‑‑ SI
+(97) 28. ꜥšꜣwt / p.Nakht ꜥšꜣ(w) SI
+(98-99) 28. A1 B1 / p.Nakht(2) ‑‑ ‑‑ SI
+(103-124) 28. present / p.Nakht(2) absent SI
+(160) 28. NN / p.Nakht(2) wi̓ SI C BD 65B
+(164) 28. (.w) / p.Nakht(2) .k(w) SI C BD 65B
+(167) 28. (hrw) / p.Nakht(2) hr(w)
+(178) 28. Y2 / p.Nakht(2) ‑‑ SI?
+(179) 28. N33pl. / p.Nakht(2) ‑‑ SI?
+(180) 28. ꞊f / p.Nakht(2) ‑‑ SI
+" shape=box]
+
+
+
+1 -- C -- "S10C^a(93)"
+1 -- O -- 8 -- A -- 2
+1 -- B
+
+2 -- D -- "B1Bo(93)"
+2 -- E -- 13 -- V -- "B2Bo^a(93)"
+
+B -- 7 -- N
+N -- 5 
+5 -- J -- 3
+5 -- L -- "B4C(93)"
+7 -- M -- "B1C(93)"
+F -- 3
+3 -- G -- "S10C^b(93)"
+
+F -- 4  
+4 -- H -- "B2Bo^b(93)"
+4 -- Q -- 9 -- I -- "S10C^c(93)"
+
+8 -- P
+P -- 10
+R -- "c.Imeni(65B)"
+22 -- R  
+
+17 -- AO -- 21
+21 -- AF -- "B4Bo(90)"
+21 -- AI -- "B2Bo^a(90)"
+
+17 -- AM -- 20 -- AH -- 18 -- AK -- 19 -- AE
+20 -- AN -- "T1L"
+19 -- AL -- "T1Be(90)"
+18 -- AJ -- "B4C(90)"
+17 -- AG
+AG -- "B1Bo(90)"
+
+AE -- 22
+10 -- AP -- 22 -- Y
+10 -- AQ -- 28 -- AZ -- 23 -- AR -- "p.Sobekmose(2)"
+28 -- BA -- "p.Nakht(2)"
+23 -- AV -- 26 -- AT -- 24 -- AS -- "p.Nebamun(2)"
+26 -- AX -- 27 -- AW -- "l.Mahu(2)"
+27 -- AY -- "p.Nebdjefau(2)"
+24 -- AU -- "p.Nu(2)"
+Y -- 14
+
+14 -- AC
+AC -- 16
+16 -- AD
+AD -- "p.Neferrenpet(Br1)(65B)"
+16 -- AA
+
+AA -- 15
+15 -- X 
+X -- "p.Tui(65B)"
+15 -- AB
+AB -- "p.Neferrenpet(NY2)(65B)"
+14 -- Z
+Z -- "p.Maiherperi(65B)"
+
+
+
+}
+#+end_src
+
+

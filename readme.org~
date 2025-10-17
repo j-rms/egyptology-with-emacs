@@ -1,0 +1,6 @@
+* Egyptology with Emacs
+** =translit.el=
+   #+begin_src 
+(add-to-list 'load-path "~/.emacs.d/elisp/") ; loading the elisp directory with the transliteration scheme in it.
+(load "translit.el") ; load the transliteration scheme itself.
+   #+end_src

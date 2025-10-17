@@ -17,7 +17,8 @@
   "Moves point to first row description of edge label entered."
   (interactive "MEdge label: ")
   (let ((edge-label (concat edge " [label=")))
-    (beginning-of-buffer)
+                                        ;(beginning-of-buffer)
+    (search-backward "graph G {")
     (search-forward edge-label nil nil)
     (beginning-of-line)
     (recenter-top-bottom)
